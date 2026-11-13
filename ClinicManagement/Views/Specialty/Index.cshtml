@@ -1,0 +1,105 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.Specialty>
+
+@{
+    ViewBag.Title = "Quản lý chuyên khoa";
+}
+
+<h2>QUẢN LÝ CHUYÊN KHOA</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<p>
+    @Html.ActionLink("+ Thêm chuyên khoa", "Create",
+            null, new { @class = "btn btn-primary" })
+</p>
+
+@using (Html.BeginForm("Index", "Specialty", FormMethod.Get))
+{
+    <div class="form-inline" style="margin-bottom:20px;">
+        <input type="text"
+               name="keyword"
+               value="@Request.QueryString["keyword"]"
+               class="form-control"
+               placeholder="Nhập mã hoặc tên chuyên khoa..." />
+
+        <button type="submit" class="btn btn-info">
+            Tìm kiếm
+        </button>
+
+        @Html.ActionLink("Làm mới", "Index",
+                 null, new { @class = "btn btn-default" })
+    </div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mã chuyên khoa</th>
+            <th>Tên chuyên khoa</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Chức năng</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @{
+            int stt = 1;
+        }
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@stt</td>
+                <td>@item.SpecialtyCode</td>
+                <td>@item.SpecialtyName</td>
+                <td>@item.Description</td>
+                <td>
+                    @if (item.IsActive)
+                    {
+                        <span class="label label-success">
+                            Hoạt động
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="label label-danger">
+                            Ngừng hoạt động
+                        </span>
+                    }
+                </td>
+                <td>
+                    @Html.ActionLink("Chi tiết", "Details",
+                             new { id = item.SpecialtyID }) |
+                    @Html.ActionLink("Sửa", "Edit",
+                             new { id = item.SpecialtyID }) |
+                    @Html.ActionLink("Xóa", "Delete",
+                             new { id = item.SpecialtyID })
+                </td>
+            </tr>
+
+            stt++;
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-center text-muted">
+        Không tìm thấy chuyên khoa.
+    </p>
+}

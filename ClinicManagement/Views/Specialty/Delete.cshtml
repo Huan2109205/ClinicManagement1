@@ -1,0 +1,50 @@
+﻿
+@model ClinicManagement.Models.Specialty
+
+@{
+    ViewBag.Title = "Xóa chuyên khoa";
+}
+
+<h2>XÓA CHUYÊN KHOA</h2>
+
+<hr />
+
+<div class="alert alert-warning">
+    Bạn có chắc chắn muốn xóa chuyên khoa này?
+</div>
+
+<dl class="dl-horizontal">
+    <dt>Mã chuyên khoa</dt>
+    <dd>@Model.SpecialtyCode</dd>
+
+    <dt>Tên chuyên khoa</dt>
+    <dd>@Model.SpecialtyName</dd>
+
+    <dt>Số bác sĩ đang sử dụng</dt>
+    <dd>@ViewBag.DoctorCount</dd>
+</dl>
+
+@if ((int)ViewBag.DoctorCount > 0)
+{
+    <div class="alert alert-danger">
+        Chuyên khoa đang được bác sĩ sử dụng.
+        Bạn không thể xóa chuyên khoa này.
+        Hãy chuyển sang trạng thái ngừng hoạt động nếu cần.
+    </div>
+
+    @Html.ActionLink("Quay lại", "Index",
+            null, new { @class = "btn btn-default" })
+}
+else
+{
+    using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <input type="submit" value="Xác nhận xóa"
+               class="btn btn-danger" />
+
+        @Html.ActionLink("Hủy", "Index",
+                 null, new { @class = "btn btn-default" })
+    }
+}

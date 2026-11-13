@@ -1,0 +1,615 @@
+﻿
+@{
+    ViewBag.Title = "Thống kê và báo cáo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .report-title {
+        color: #263445;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .report-subtitle {
+        color: #7b8794;
+        margin-bottom: 25px;
+    }
+
+    .report-card {
+        border: none;
+        border-radius: 12px;
+        padding: 22px;
+        color: white;
+        margin-bottom: 20px;
+        min-height: 130px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+        .report-card h6 {
+            font-size: 13px;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+
+        .report-card h3 {
+            font-size: 23px;
+            font-weight: 800;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .report-card small {
+            display: block;
+            margin-top: 8px;
+            opacity: .9;
+        }
+
+    .report-green {
+        background: linear-gradient(135deg,#27ae60,#1e8449);
+    }
+
+    .report-blue {
+        background: linear-gradient(135deg,#3498db,#2471a3);
+    }
+
+    .report-orange {
+        background: linear-gradient(135deg,#e67e22,#ca6f1e);
+    }
+
+    .report-red {
+        background: linear-gradient(135deg,#e74c3c,#b03a2e);
+    }
+
+    .report-purple {
+        background: linear-gradient(135deg,#8e44ad,#6c3483);
+    }
+
+    .report-teal {
+        background: linear-gradient(135deg,#16a085,#117864);
+    }
+
+    .report-dark {
+        background: linear-gradient(135deg,#34495e,#263445);
+    }
+
+    .report-panel {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        margin-bottom: 25px;
+    }
+
+        .report-panel h4 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #263445;
+            margin-bottom: 20px;
+        }
+
+    .chart-container {
+        position: relative;
+        height: 330px;
+        width: 100%;
+    }
+
+    .report-table th {
+        background: #f5f7fa;
+        color: #344054;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .money-value {
+        font-weight: 700;
+        color: #218838;
+    }
+
+    .report-filter {
+        background: white;
+        padding: 18px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.05);
+    }
+
+    @@media(max-width:767px) {
+        .report-card h3 {
+            font-size: 20px;
+        }
+
+        .chart-container {
+            height: 280px;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="mb-4">
+        <h2 class="report-title">THỐNG KÊ VÀ BÁO CÁO</h2>
+        <p class="report-subtitle">
+            Theo dõi doanh thu, công nợ và hoạt động khám chữa bệnh.
+        </p>
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="report-filter">
+
+        @using (Html.BeginForm("Index", "Statistics", FormMethod.Get))
+        {
+            <div class="row">
+
+                <div class="col-md-3 col-sm-6">
+                    <label>Chọn năm thống kê</label>
+
+                    <select name="year" class="form-control">
+                        @for (int y = DateTime.Today.Year - 5;
+                              y <= DateTime.Today.Year + 1; y++)
+                        {
+                            <option value="@y"
+                                    @(Convert.ToInt32(ViewBag.SelectedYear) == y ? "selected" : "")>
+                                @y
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4 col-sm-6" style="padding-top:25px;">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-search"></i>
+                        Xem báo cáo
+                    </button>
+
+                    <a href="@Url.Action("ExportExcel", "Statistics",
+                         new { year = ViewBag.SelectedYear })"
+                       class="btn btn-success">
+                        <i class="glyphicon glyphicon-download-alt"></i>
+                        Xuất Excel
+                    </a>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- TỔNG QUAN TÀI CHÍNH -->
+    <h4 style="font-weight:700;color:#263445;margin-bottom:15px;">
+        TỔNG QUAN TÀI CHÍNH NĂM @ViewBag.SelectedYear
+    </h4>
+
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-dark">
+                <h6>TỔNG GIÁ TRỊ HÓA ĐƠN</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.TotalInvoiceAmount)</h3>
+                <small>VNĐ - Không tính hóa đơn đã hủy</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-green">
+                <h6>TỔNG DOANH THU ĐÃ THU</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.TotalRevenue)</h3>
+                <small>VNĐ - Tiền đã nhận thực tế</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-red">
+                <h6>TỔNG CÔNG NỢ</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.TotalDebt)</h3>
+                <small>VNĐ - Tiền chưa thu</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-purple">
+                <h6>DOANH THU TRUNG BÌNH</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.AverageRevenue)</h3>
+                <small>VNĐ / hóa đơn có thanh toán</small>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DOANH THU THEO NGUỒN -->
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-blue">
+                <h6>DOANH THU TIỀN KHÁM</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.ConsultationRevenue)</h3>
+                <small>VNĐ</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-orange">
+                <h6>DOANH THU TIỀN THUỐC</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.MedicineRevenue)</h3>
+                <small>VNĐ</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-teal">
+                <h6>DOANH THU HÔM NAY</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.TodayRevenue)</h3>
+                <small>VNĐ</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-blue">
+                <h6>DOANH THU THÁNG NÀY</h6>
+                <h3>@String.Format("{0:N0}", ViewBag.CurrentMonthRevenue)</h3>
+                <small>VNĐ</small>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- THỐNG KÊ SỐ LƯỢNG HÓA ĐƠN -->
+    <h4 style="font-weight:700;color:#263445;margin:10px 0 15px;">
+        TÌNH HÌNH HÓA ĐƠN
+    </h4>
+
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-dark">
+                <h6>TỔNG HÓA ĐƠN</h6>
+                <h3>@ViewBag.TotalInvoices</h3>
+                <small>Hóa đơn trong năm</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-green">
+                <h6>ĐÃ THANH TOÁN</h6>
+                <h3>@ViewBag.PaidInvoices</h3>
+                <small>Hóa đơn</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-orange">
+                <h6>THANH TOÁN MỘT PHẦN</h6>
+                <h3>@ViewBag.PartialInvoices</h3>
+                <small>Hóa đơn</small>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-red">
+                <h6>CHƯA THANH TOÁN</h6>
+                <h3>@ViewBag.UnpaidInvoices</h3>
+                <small>Hóa đơn</small>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HÓA ĐƠN ĐÃ HỦY -->
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6">
+            <div class="report-card report-purple">
+                <h6>HÓA ĐƠN ĐÃ HỦY</h6>
+                <h3>@ViewBag.CancelledInvoices</h3>
+                <small>Hóa đơn</small>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BIỂU ĐỒ -->
+    <div class="row">
+
+        <div class="col-lg-8">
+            <div class="report-panel">
+                <h4>
+                    DOANH THU THEO THÁNG - @ViewBag.SelectedYear
+                </h4>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="report-panel">
+                <h4>LỊCH KHÁM THEO TRẠNG THÁI</h4>
+
+                <div class="chart-container">
+                    <canvas id="appointmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BIỂU ĐỒ CÔNG NỢ -->
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="report-panel">
+                <h4>CÔNG NỢ THEO THÁNG - @ViewBag.SelectedYear</h4>
+
+                <div class="chart-container">
+                    <canvas id="debtChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BẢNG THỐNG KÊ -->
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="report-panel">
+                <h4>TỔNG QUAN HÓA ĐƠN</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered report-table">
+
+                        <tr>
+                            <th>Tổng giá trị hóa đơn</th>
+                            <td class="money-value">
+                                @String.Format("{0:N0}", ViewBag.TotalInvoiceAmount) VNĐ
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Tổng tiền đã thu</th>
+                            <td class="money-value">
+                                @String.Format("{0:N0}", ViewBag.TotalRevenue) VNĐ
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Tổng công nợ</th>
+                            <td class="text-danger">
+                                <strong>
+                                    @String.Format("{0:N0}", ViewBag.TotalDebt) VNĐ
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Đã thanh toán</th>
+                            <td>@ViewBag.PaidInvoices</td>
+                        </tr>
+
+                        <tr>
+                            <th>Thanh toán một phần</th>
+                            <td>@ViewBag.PartialInvoices</td>
+                        </tr>
+
+                        <tr>
+                            <th>Chưa thanh toán</th>
+                            <td>@ViewBag.UnpaidInvoices</td>
+                        </tr>
+
+                        <tr>
+                            <th>Đã hủy</th>
+                            <td>@ViewBag.CancelledInvoices</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="report-panel">
+                <h4>TỔNG QUAN LỊCH KHÁM</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered report-table">
+
+                        <tr>
+                            <th>Tổng lịch khám</th>
+                            <td>@ViewBag.TotalAppointments</td>
+                        </tr>
+
+                        <tr>
+                            <th>Lịch khám hôm nay</th>
+                            <td>@ViewBag.TodayAppointments</td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ĐIỀU HƯỚNG -->
+    <div class="mb-4">
+
+        @Html.ActionLink(
+                 "Quay về Dashboard",
+                 "Index",
+                 "Dashboard",
+                 null,
+                 new { @class = "btn btn-secondary" })
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var monthLabels = @Html.Raw(ViewBag.MonthLabelsJson);
+        var monthRevenue = @Html.Raw(ViewBag.MonthRevenueJson);
+        var monthConsultation = @Html.Raw(ViewBag.MonthConsultationJson);
+        var monthMedicine = @Html.Raw(ViewBag.MonthMedicineJson);
+        var monthDebt = @Html.Raw(ViewBag.MonthDebtJson);
+
+        var appointmentLabels =
+            @Html.Raw(ViewBag.AppointmentStatusJson);
+
+        var appointmentCounts =
+            @Html.Raw(ViewBag.AppointmentCountJson);
+
+        function formatMoney(value) {
+            return Number(value).toLocaleString("vi-VN") + " VNĐ";
+        }
+
+        // BIỂU ĐỒ DOANH THU
+        var revenueCanvas = document.getElementById("revenueChart");
+
+        if (revenueCanvas) {
+            new Chart(revenueCanvas, {
+                type: "bar",
+
+                data: {
+                    labels: monthLabels,
+
+                    datasets: [
+                        {
+                            label: "Tiền khám đã thu",
+                            data: monthConsultation,
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Tiền thuốc đã thu",
+                            data: monthMedicine,
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Tổng doanh thu đã thu",
+                            data: monthRevenue,
+                            type: "line",
+                            borderWidth: 3,
+                            tension: 0.3
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ": " +
+                                        formatMoney(context.raw);
+                                }
+                            }
+                        }
+                    },
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                callback: function(value) {
+                                    return Number(value).toLocaleString("vi-VN");
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // BIỂU ĐỒ TRẠNG THÁI LỊCH KHÁM
+        var appointmentCanvas =
+            document.getElementById("appointmentChart");
+
+        if (appointmentCanvas) {
+            new Chart(appointmentCanvas, {
+                type: "doughnut",
+
+                data: {
+                    labels: appointmentLabels,
+
+                    datasets: [{
+                        label: "Số lịch khám",
+                        data: appointmentCounts,
+                        borderWidth: 1
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // BIỂU ĐỒ CÔNG NỢ
+        var debtCanvas = document.getElementById("debtChart");
+
+        if (debtCanvas) {
+            new Chart(debtCanvas, {
+                type: "bar",
+
+                data: {
+                    labels: monthLabels,
+
+                    datasets: [{
+                        label: "Công nợ còn lại",
+                        data: monthDebt,
+                        borderWidth: 1
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return "Công nợ: " +
+                                        formatMoney(context.raw);
+                                }
+                            }
+                        }
+                    },
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                callback: function(value) {
+                                    return Number(value).toLocaleString("vi-VN");
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    });
+</script>

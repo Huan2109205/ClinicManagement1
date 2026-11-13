@@ -1,0 +1,63 @@
+﻿@model ClinicManagement.Models.Patient
+
+@{
+    ViewBag.Title = "Chi tiết bệnh nhân";
+}
+
+<h2>CHI TIẾT BỆNH NHÂN</h2>
+
+<hr />
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <strong>Thông tin bệnh nhân</strong>
+    </div>
+
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Mã bệnh nhân</dt>
+            <dd>@Model.PatientCode</dd>
+
+            <dt>Họ và tên</dt>
+            <dd>@Model.FullName</dd>
+
+            <dt>Ngày sinh</dt>
+            <dd>
+                @(Model.DateOfBirth.HasValue
+                    ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy")
+                    : "Chưa cập nhật")
+            </dd>
+
+            <dt>Giới tính</dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(Model.Gender)
+                ? "Chưa cập nhật" : Model.Gender)
+            </dd>
+
+            <dt>Số điện thoại</dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(Model.Phone)
+                ? "Chưa cập nhật" : Model.Phone)
+            </dd>
+
+            <dt>Email</dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(Model.Email)
+                ? "Chưa cập nhật" : Model.Email)
+            </dd>
+
+            <dt>Địa chỉ</dt>
+            <dd>
+                @(string.IsNullOrWhiteSpace(Model.Address)
+                ? "Chưa cập nhật" : Model.Address)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+@Html.ActionLink("Chỉnh sửa", "Edit",
+    new { id = Model.PatientID },
+    new { @class = "btn btn-warning" })
+
+@Html.ActionLink("Quay lại danh sách", "Index",
+    null, new { @class = "btn btn-default" })

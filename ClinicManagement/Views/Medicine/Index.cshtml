@@ -1,0 +1,107 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.Medicine>
+
+@{
+    ViewBag.Title = "Quản lý thuốc";
+}
+
+<div class="container mt-4">
+    <h2>QUẢN LÝ DANH MỤC THUỐC</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @using (Html.BeginForm("Index", "Medicine", FormMethod.Get))
+    {
+        <div class="row mb-3">
+            <div class="col-md-5">
+                <input type="text" name="keyword"
+                       value="@ViewBag.Keyword"
+                       class="form-control"
+                       placeholder="Tìm mã thuốc, tên thuốc..." />
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                </button>
+            </div>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <div class="col-md-3">
+                    @Html.ActionLink("+ Thêm thuốc", "Create", null,
+                             new { @class = "btn btn-success" })
+                </div>
+            }
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã thuốc</th>
+                    <th>Tên thuốc</th>
+                    <th>Hoạt chất</th>
+                    <th>Đơn vị</th>
+                    <th>Đơn giá</th>
+                    <th>Trạng thái</th>
+
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    {
+                        <th>Thao tác</th>
+                    }
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MedicineCode</td>
+                        <td>@item.MedicineName</td>
+                        <td>@item.ActiveIngredient</td>
+                        <td>@item.Unit</td>
+                        <td>@item.UnitPrice.ToString("N0") VNĐ</td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="text-success">Đang sử dụng</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Ngừng sử dụng</span>
+                            }
+                        </td>
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <td>
+                                @Html.ActionLink("Sửa", "Edit",
+                                         new { id = item.MedicineID },
+                                         new { @class = "btn btn-warning btn-sm" })
+
+                                @using (Html.BeginForm("ToggleStatus", "Medicine",
+                                    new { id = item.MedicineID }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-secondary btn-sm mt-1">
+                                        @(item.IsActive ? "Ngừng dùng" : "Kích hoạt")
+                                    </button>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

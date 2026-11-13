@@ -1,0 +1,45 @@
+﻿
+@model ClinicManagement.Models.ActivityLog
+
+@{
+    ViewBag.Title = "Chi tiết nhật ký";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3 class="mb-4">Chi tiết nhật ký hoạt động</h3>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-md-3">Tài khoản</dt>
+            <dd class="col-md-9">@Model.UserName</dd>
+
+            <dt class="col-md-3">Hành động</dt>
+            <dd class="col-md-9">@Model.Action</dd>
+
+            <dt class="col-md-3">Phân hệ</dt>
+            <dd class="col-md-9">@Model.Module</dd>
+
+            <dt class="col-md-3">Nội dung</dt>
+            <dd class="col-md-9">@Model.Description</dd>
+
+            <dt class="col-md-3">Thời gian</dt>
+            <dd class="col-md-9">
+                @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")
+            </dd>
+
+            <dt class="col-md-3">Địa chỉ IP</dt>
+            <dd class="col-md-9">@Model.IPAddress</dd>
+
+        </dl>
+
+        @Html.ActionLink(
+                 "Quay lại",
+                 "Index",
+                 null,
+                 new { @class = "btn btn-secondary" })
+
+    </div>
+</div>

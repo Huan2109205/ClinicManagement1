@@ -1,0 +1,482 @@
+﻿
+@model ClinicManagement.Models.Invoice
+
+@{
+    ViewBag.Title = "In hóa đơn";
+    Layout = null;
+
+    decimal paidAmount = Model.PaidAmount;
+
+    if (Model.PaymentStatus == "Đã thanh toán" && paidAmount <= 0)
+    {
+        paidAmount = Model.TotalAmount;
+    }
+
+    decimal remaining = Model.PaymentStatus == "Đã hủy"
+        ? 0m
+        : Math.Max(0m, Model.TotalAmount - paidAmount);
+
+    string patientName = Model.Appointment != null &&
+                         Model.Appointment.Patient != null
+        ? Model.Appointment.Patient.FullName : "";
+
+    string doctorName = Model.Appointment != null &&
+                        Model.Appointment.Doctor != null
+        ? Model.Appointment.Doctor.FullName : "";
+
+    string appointmentCode = Model.Appointment != null
+        ? Model.Appointment.AppointmentCode : "";
+
+    string appointmentDate = Model.Appointment != null
+        ? Model.Appointment.AppointmentDate.ToString("dd/MM/yyyy") : "";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hóa đơn - @Model.InvoiceCode</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef1f5;
+            color: #263445;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .invoice-container {
+            max-width: 850px;
+            min-height: 1050px;
+            margin: auto;
+            background: #fff;
+            padding: 45px 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .clinic-name {
+            font-size: 25px;
+            font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .clinic-info {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .invoice-title {
+            font-size: 23px;
+            font-weight: 800;
+            margin-top: 22px;
+            letter-spacing: 1px;
+        }
+
+        .invoice-code {
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 25px 0 12px;
+            color: #1e40af;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+            .invoice-table th,
+            .invoice-table td {
+                border: 1px solid #dbe1e8;
+                padding: 11px 13px;
+                font-size: 14px;
+            }
+
+            .invoice-table th {
+                width: 38%;
+                background: #f8fafc;
+                text-align: left;
+                font-weight: 600;
+            }
+
+        .amount-table th {
+            width: 65%;
+        }
+
+        .amount-table td {
+            text-align: right;
+        }
+
+        .total {
+            color: #dc2626;
+            font-size: 17px !important;
+            font-weight: 800;
+        }
+
+        .paid {
+            color: #15803d;
+            font-weight: 700;
+        }
+
+        .remaining {
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .payment-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-unpaid {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .note {
+            min-height: 40px;
+            white-space: pre-wrap;
+        }
+
+        .footer {
+            margin-top: 65px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            gap: 30px;
+        }
+
+        .signature {
+            width: 50%;
+        }
+
+            .signature strong {
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            .signature p {
+                font-size: 13px;
+                font-style: italic;
+                margin-top: 0;
+            }
+
+        .signature-space {
+            height: 90px;
+        }
+
+        .thank-you {
+            text-align: center;
+            margin-top: 35px;
+            font-style: italic;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .buttons {
+            text-align: center;
+            margin: 25px auto;
+        }
+
+        button {
+            padding: 11px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+
+        .print-btn {
+            background: #198754;
+            color: white;
+        }
+
+        .close-btn {
+            background: #64748b;
+            color: white;
+        }
+
+        @@media print {
+            @@page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .invoice-container {
+                max-width: none;
+                min-height: 0;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .buttons {
+                display: none !important;
+            }
+
+            .invoice-table th,
+            .invoice-table td {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .footer {
+                page-break-inside: avoid;
+            }
+        }
+
+        @@media(max-width: 600px) {
+            .invoice-container {
+                padding: 20px 15px;
+            }
+
+            .clinic-name {
+                font-size: 20px;
+            }
+
+            .invoice-table th,
+            .invoice-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .footer {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="invoice-container">
+
+        <div class="header">
+            <div class="clinic-name">
+                PHÒNG KHÁM ĐA KHOA
+            </div>
+
+            <div class="clinic-info">
+                HỆ THỐNG QUẢN LÝ PHÒNG KHÁM<br />
+                Điện thoại: ....................................<br />
+                Địa chỉ: ........................................
+            </div>
+
+            <div class="invoice-title">
+                HÓA ĐƠN THANH TOÁN
+            </div>
+
+            <div class="invoice-code">
+                Mã hóa đơn: @Model.InvoiceCode
+            </div>
+        </div>
+
+        <div class="section-title">
+            I. THÔNG TIN HÓA ĐƠN
+        </div>
+
+        <table class="invoice-table">
+            <tr>
+                <th>Mã hóa đơn</th>
+                <td>@Model.InvoiceCode</td>
+            </tr>
+
+            <tr>
+                <th>Ngày lập hóa đơn</th>
+                <td>@Model.InvoiceDate.ToString("dd/MM/yyyy")</td>
+            </tr>
+
+            <tr>
+                <th>Mã lịch khám</th>
+                <td>@appointmentCode</td>
+            </tr>
+
+            <tr>
+                <th>Ngày khám</th>
+                <td>@appointmentDate</td>
+            </tr>
+        </table>
+
+        <div class="section-title">
+            II. THÔNG TIN BỆNH NHÂN
+        </div>
+
+        <table class="invoice-table">
+            <tr>
+                <th>Họ và tên bệnh nhân</th>
+                <td>@patientName</td>
+            </tr>
+
+            <tr>
+                <th>Bác sĩ phụ trách</th>
+                <td>@doctorName</td>
+            </tr>
+        </table>
+
+        <div class="section-title">
+            III. CHI TIẾT THANH TOÁN
+        </div>
+
+        <table class="invoice-table amount-table">
+            <tr>
+                <th>Chi phí khám bệnh</th>
+                <td>@Model.ConsultationFee.ToString("N0") VNĐ</td>
+            </tr>
+
+            <tr>
+                <th>Chi phí thuốc</th>
+                <td>@Model.MedicineAmount.ToString("N0") VNĐ</td>
+            </tr>
+
+            <tr>
+                <th>TỔNG TIỀN</th>
+                <td class="total">
+                    @Model.TotalAmount.ToString("N0") VNĐ
+                </td>
+            </tr>
+
+            <tr>
+                <th>Đã thanh toán</th>
+                <td class="paid">
+                    @paidAmount.ToString("N0") VNĐ
+                </td>
+            </tr>
+
+            <tr>
+                <th>Còn phải thanh toán</th>
+                <td class="remaining">
+                    @remaining.ToString("N0") VNĐ
+                </td>
+            </tr>
+        </table>
+
+        <div class="section-title">
+            IV. TRẠNG THÁI THANH TOÁN
+        </div>
+
+        <table class="invoice-table">
+            <tr>
+                <th>Phương thức thanh toán</th>
+                <td>
+                    @(string.IsNullOrWhiteSpace(Model.PaymentMethod)
+                        ? "Chưa ghi nhận" : Model.PaymentMethod)
+                </td>
+            </tr>
+
+            <tr>
+                <th>Trạng thái</th>
+                <td>
+                    @if (Model.PaymentStatus == "Đã thanh toán")
+                    {
+                        <span class="payment-status status-paid">
+                            ĐÃ THANH TOÁN
+                        </span>
+                    }
+                    else if (Model.PaymentStatus == "Thanh toán một phần")
+                    {
+                        <span class="payment-status status-partial">
+                            THANH TOÁN MỘT PHẦN
+                        </span>
+                    }
+                    else if (Model.PaymentStatus == "Đã hủy")
+                    {
+                        <span class="payment-status status-cancelled">
+                            ĐÃ HỦY
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="payment-status status-unpaid">
+                            CHƯA THANH TOÁN
+                        </span>
+                    }
+                </td>
+            </tr>
+
+            <tr>
+                <th>Ghi chú</th>
+                <td class="note">
+                    @(string.IsNullOrWhiteSpace(Model.Note)
+                        ? "Không có" : Model.Note)
+                </td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            <div class="signature">
+                <strong>NGƯỜI LẬP HÓA ĐƠN</strong>
+                <p>(Ký và ghi rõ họ tên)</p>
+                <div class="signature-space"></div>
+            </div>
+
+            <div class="signature">
+                <strong>NGƯỜI THANH TOÁN</strong>
+                <p>(Ký và ghi rõ họ tên)</p>
+                <div class="signature-space"></div>
+            </div>
+        </div>
+
+        <div class="thank-you">
+            Cảm ơn quý khách đã sử dụng dịch vụ của phòng khám!
+        </div>
+
+    </div>
+
+    <div class="buttons">
+        <button class="print-btn" onclick="window.print()">
+            In hóa đơn
+        </button>
+
+        <button class="close-btn" onclick="window.close()">
+            Đóng
+        </button>
+    </div>
+
+</body>
+</html>

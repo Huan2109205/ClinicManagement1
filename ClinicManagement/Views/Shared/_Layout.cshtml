@@ -1,0 +1,570 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewBag.Title - Clinic Management</title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .main-navbar {
+            background: linear-gradient(135deg, #263445, #172331);
+            box-shadow: 0 3px 12px rgba(0,0,0,.12);
+        }
+
+        .navbar-brand {
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .main-navbar .nav-link {
+            color: rgba(255,255,255,.9);
+            font-weight: 500;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+
+            .main-navbar .nav-link:hover {
+                color: white;
+                background: rgba(255,255,255,.1);
+                border-radius: 6px;
+            }
+
+        /* MENU XỔ XUỐNG */
+        .main-navbar .dropdown {
+            position: relative;
+        }
+
+        .main-navbar .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 2000;
+            min-width: 220px;
+            margin: 0;
+            padding: 8px;
+            list-style: none;
+            background: white;
+            border: none;
+            border-radius: 9px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.18);
+        }
+
+        .main-navbar .dropdown.open > .dropdown-menu {
+            display: block;
+        }
+
+        .main-navbar .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            color: #263445;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+            .main-navbar .dropdown-item:hover {
+                background: #edf3f8;
+                color: #2471a3;
+            }
+
+        .main-navbar .dropdown-divider {
+            border: 0;
+            border-top: 1px solid #e5e9ed;
+            margin: 6px 0;
+        }
+
+        .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 7px;
+            vertical-align: middle;
+            content: "";
+            border-top: 5px solid currentColor;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+        }
+
+        .account-name {
+            color: white;
+            font-size: 13px;
+            padding: 9px 10px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 150px);
+            padding-top: 25px;
+            padding-bottom: 25px;
+        }
+
+        .main-footer {
+            border-top: 1px solid #e3e8ee;
+            padding: 18px 0;
+            margin-top: 20px;
+            color: #8793a1;
+            font-size: 13px;
+        }
+
+        .logout-button {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 13px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 991px) {
+            .main-navbar .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin: 3px 0 8px;
+            }
+
+            .main-navbar .navbar-nav {
+                margin-top: 5px;
+            }
+
+            .account-name {
+                padding-left: 12px;
+            }
+
+            .logout-button {
+                margin: 8px 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- THANH ĐIỀU HƯỚNG -->
+    <nav class="navbar navbar-expand-lg navbar-dark main-navbar">
+        <div class="container-fluid px-lg-4">
+
+            @Html.ActionLink(
+                     "Clinic Management",
+                     "Index",
+                     "Dashboard",
+                     new { area = "" },
+                     new { @class = "navbar-brand" }
+                 )
+
+            <button type="button"
+                    class="navbar-toggler"
+                    id="navbarButton"
+                    aria-label="Mở menu"
+                    aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+
+                <ul class="navbar-nav me-auto">
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink(
+                                     "Dashboard",
+                                     "Index",
+                                     "Dashboard",
+                                     null,
+                                     new { @class = "nav-link" }
+                                 )
+                        </li>
+                    }
+
+                    <!-- DANH MỤC -->
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Receptionist") ||
+                         User.IsInRole("Doctor"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a href="#"
+                               class="nav-link dropdown-toggle"
+                               role="button"
+                               aria-expanded="false">
+                                Danh mục
+                            </a>
+
+                            <ul class="dropdown-menu">
+
+                                @if (User.IsInRole("Admin") ||
+                                     User.IsInRole("Manager") ||
+                                     User.IsInRole("Receptionist"))
+                                {
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Bệnh nhân",
+                                                 "Index",
+                                                 "Patient",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Bác sĩ",
+                                                 "Index",
+                                                 "Doctor",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("Admin") ||
+                                     User.IsInRole("Manager"))
+                                {
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Chuyên khoa",
+                                                 "Index",
+                                                 "Specialty",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("Admin") ||
+                                     User.IsInRole("Manager") ||
+                                     User.IsInRole("Receptionist") ||
+                                     User.IsInRole("Doctor"))
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Danh sách thuốc",
+                                                 "Index",
+                                                 "Medicine",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- KHÁM CHỮA BỆNH -->
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Receptionist") ||
+                         User.IsInRole("Doctor"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a href="#"
+                               class="nav-link dropdown-toggle"
+                               role="button"
+                               aria-expanded="false">
+                                Khám chữa bệnh
+                            </a>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    @Html.ActionLink(
+                                             "Lịch khám",
+                                             "Index",
+                                             "Appointment",
+                                             null,
+                                             new { @class = "dropdown-item" }
+                                         )
+                                </li>
+
+                                <li>
+                                    @Html.ActionLink(
+                                             "Hồ sơ khám bệnh",
+                                             "Index",
+                                             "MedicalRecord",
+                                             null,
+                                             new { @class = "dropdown-item" }
+                                         )
+                                </li>
+
+                                @if (User.IsInRole("Admin") ||
+                                     User.IsInRole("Manager") ||
+                                     User.IsInRole("Doctor"))
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Kê đơn thuốc",
+                                                 "Index",
+                                                 "Prescription",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                                @if (User.IsInRole("Doctor"))
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Hồ sơ cá nhân",
+                                                 "Index",
+                                                 "Profile",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- TÀI CHÍNH -->
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Receptionist"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a href="#"
+                               class="nav-link dropdown-toggle"
+                               role="button"
+                               aria-expanded="false">
+                                Tài chính
+                            </a>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    @Html.ActionLink(
+                                             "Quản lý hóa đơn",
+                                             "Index",
+                                             "Invoice",
+                                             null,
+                                             new { @class = "dropdown-item" }
+                                         )
+                                </li>
+
+                                @if (User.IsInRole("Admin") ||
+                                     User.IsInRole("Manager"))
+                                {
+                                    <li>
+                                        @Html.ActionLink(
+                                                 "Thống kê và báo cáo",
+                                                 "Index",
+                                                 "Statistics",
+                                                 null,
+                                                 new { @class = "dropdown-item" }
+                                             )
+                                    </li>
+                                }
+
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- HỆ THỐNG -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a href="#"
+                               class="nav-link dropdown-toggle"
+                               role="button"
+                               aria-expanded="false">
+                                Hệ thống
+                            </a>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    @Html.ActionLink(
+                                             "Quản lý tài khoản",
+                                             "Index",
+                                             "User",
+                                             null,
+                                             new { @class = "dropdown-item" }
+                                         )
+                                </li>
+
+                                <li>
+                                    @Html.ActionLink(
+                                             "Nhật ký hoạt động",
+                                             "Index",
+                                             "ActivityLog",
+                                             null,
+                                             new { @class = "dropdown-item" }
+                                         )
+                                </li>
+
+                            </ul>
+                        </li>
+                    }
+
+                </ul>
+
+                <!-- TÀI KHOẢN -->
+                <ul class="navbar-nav ms-auto">
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link account-name">
+                                Xin chào, <strong>@User.Identity.Name</strong>
+                            </span>
+                        </li>
+
+                        <li class="nav-item">
+                            @Html.ActionLink(
+                                     "Đổi mật khẩu",
+                                     "ChangePassword",
+                                     "Account",
+                                     null,
+                                     new { @class = "nav-link" }
+                                 )
+                        </li>
+
+                        <li class="nav-item">
+                            @using (Html.BeginForm(
+                                "Logout",
+                                "Account",
+                                FormMethod.Post,
+                                new { @class = "d-inline" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-danger btn-sm logout-button">
+                                    Đăng xuất
+                                </button>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            @Html.ActionLink(
+                                     "Đăng nhập",
+                                     "Login",
+                                     "Account",
+                                     null,
+                                     new { @class = "nav-link" }
+                                 )
+                        </li>
+                    }
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- NỘI DUNG -->
+    <main class="container-fluid main-content px-lg-4">
+        @RenderBody()
+    </main>
+
+    <!-- CHÂN TRANG -->
+    <footer class="main-footer text-center">
+        <div class="container">
+            <p class="mb-1">
+                &copy; @DateTime.Now.Year - Clinic Management
+            </p>
+            <p class="mb-0">
+                Hệ thống quản lý phòng khám
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <script>document.addEventListener("DOMContentLoaded", function () {
+
+            // Xử lý menu xổ xuống
+            var dropdowns = document.querySelectorAll(
+                ".main-navbar .dropdown"
+            );
+
+            function closeAllDropdowns() {
+                dropdowns.forEach(function (item) {
+                    item.classList.remove("open");
+
+                    var toggle = item.querySelector(".dropdown-toggle");
+
+                    if (toggle) {
+                        toggle.setAttribute("aria-expanded", "false");
+                    }
+                });
+            }
+
+            dropdowns.forEach(function (item) {
+                var toggle = item.querySelector(".dropdown-toggle");
+
+                if (!toggle) return;
+
+                toggle.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    var isOpen = item.classList.contains("open");
+
+                    closeAllDropdowns();
+
+                    if (!isOpen) {
+                        item.classList.add("open");
+                        toggle.setAttribute("aria-expanded", "true");
+                    }
+                });
+            });
+
+            // Nhấn bên ngoài để đóng menu
+            document.addEventListener("click", function (event) {
+                if (!event.target.closest(".main-navbar .dropdown")) {
+                    closeAllDropdowns();
+                }
+            });
+
+            // Nhấn Escape để đóng menu
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeAllDropdowns();
+                }
+            });
+
+            // Nút mở menu trên điện thoại
+            var navbarButton = document.getElementById("navbarButton");
+            var navbar = document.getElementById("mainNavbar");
+
+            if (navbarButton && navbar) {
+                navbarButton.addEventListener("click", function () {
+                    var isOpen = navbar.classList.contains("show");
+
+                    navbar.classList.toggle("show", !isOpen);
+                    navbarButton.setAttribute(
+                        "aria-expanded",
+                        (!isOpen).toString()
+                    );
+                });
+            }
+
+        });</script>
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

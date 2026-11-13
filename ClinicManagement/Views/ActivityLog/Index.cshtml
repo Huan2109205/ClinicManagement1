@@ -1,0 +1,142 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.ActivityLog>
+
+@{
+    ViewBag.Title = "Nhật ký hoạt động";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .log-title {
+        font-weight: 700;
+        color: #263445;
+    }
+
+    .log-card {
+        background: white;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 3px 15px rgba(0,0,0,.06);
+    }
+
+    .log-table th {
+        background: #263445;
+        color: white;
+        white-space: nowrap;
+    }
+
+    .log-table td {
+        vertical-align: middle;
+    }
+</style>
+
+<h3 class="log-title mb-4">
+    <i class="fas fa-history"></i> Nhật ký hoạt động
+</h3>
+
+<div class="log-card">
+
+    @using (Html.BeginForm("Index", "ActivityLog", FormMethod.Get))
+    {
+        <div class="row mb-3">
+
+            <div class="col-md-3 mb-2">
+                <input type="text"
+                       name="keyword"
+                       value="@ViewBag.Keyword"
+                       class="form-control"
+                       placeholder="Tìm tài khoản, nội dung..." />
+            </div>
+
+            <div class="col-md-2 mb-2">
+                @Html.DropDownList(
+                         "module",
+                         (SelectList)ViewBag.Modules,
+                         "Tất cả phân hệ",
+                         new { @class = "form-control" })
+            </div>
+
+            <div class="col-md-2 mb-2">
+                <input type="date"
+                       name="fromDate"
+                       value="@ViewBag.FromDate"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-2 mb-2">
+                <input type="date"
+                       name="toDate"
+                       value="@ViewBag.ToDate"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+
+                <a href="@Url.Action("Index")"
+                   class="btn btn-secondary">
+                    Làm mới
+                </a>
+            </div>
+
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover log-table">
+
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tài khoản</th>
+                    <th>Hành động</th>
+                    <th>Phân hệ</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                    <th>IP</th>
+                    <th>Chi tiết</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    int stt = 1;
+                }
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@stt</td>
+                        <td>@item.UserName</td>
+                        <td>@item.Action</td>
+                        <td>@item.Module</td>
+                        <td>@item.Description</td>
+                        <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td>@item.IPAddress</td>
+                        <td>
+                            @Html.ActionLink(
+                                     "Xem",
+                                     "Details",
+                                     new { id = item.ActivityLogID },
+                                     new { @class = "btn btn-info btn-sm" })
+                        </td>
+                    </tr>
+
+                    stt++;
+                }
+
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            Chưa có nhật ký hoạt động.
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>

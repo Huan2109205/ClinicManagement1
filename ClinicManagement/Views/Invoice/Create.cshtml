@@ -1,0 +1,127 @@
+﻿
+@model ClinicManagement.Models.Invoice
+
+@{
+    ViewBag.Title = "Thêm hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>THÊM HÓA ĐƠN</h2>
+
+<hr />
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.InvoiceCode, "Mã hóa đơn")
+        @Html.TextBoxFor(m => m.InvoiceCode,
+                 new { @class = "form-control", placeholder = "Nhập mã hóa đơn" })
+        @Html.ValidationMessageFor(m => m.InvoiceCode, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.AppointmentID, "Lịch khám")
+        @Html.DropDownListFor(m => m.AppointmentID,
+                 (SelectList)ViewBag.AppointmentID,
+                 "-- Chọn lịch khám --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.AppointmentID, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.InvoiceDate, "Ngày lập hóa đơn")
+        @Html.TextBoxFor(m => m.InvoiceDate, "{0:yyyy-MM-dd}",
+                 new { @class = "form-control", type = "date" })
+        @Html.ValidationMessageFor(m => m.InvoiceDate, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <!-- TIỀN KHÁM -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.ConsultationFee, "Tiền khám (VNĐ)")
+        @Html.TextBoxFor(m => m.ConsultationFee,
+                new
+                {
+                    @class = "form-control",
+                    type = "number",
+                    min = "0",
+                    step = "1000",
+                    id = "ConsultationFee"
+                })
+        @Html.ValidationMessageFor(m => m.ConsultationFee, "",
+                new { @class = "text-danger" })
+    </div>
+
+    <!-- TIỀN THUỐC -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.MedicineAmount, "Tiền thuốc (VNĐ)")
+        @Html.TextBoxFor(m => m.MedicineAmount,
+                new
+                {
+                    @class = "form-control",
+                    @readonly = "readonly",
+                    id = "MedicineAmount"
+                })
+        <small class="text-muted">
+            Tiền thuốc được tính tự động từ đơn kê thuốc của lịch khám.
+        </small>
+    </div>
+
+    <!-- TỔNG TIỀN -->
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.TotalAmount, "Tổng tiền (VNĐ)")
+        @Html.TextBoxFor(m => m.TotalAmount,
+                new
+                {
+                    @class = "form-control",
+                    @readonly = "readonly",
+                    id = "TotalAmount"
+                })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.PaymentMethod, "Phương thức thanh toán")
+        @Html.DropDownListFor(m => m.PaymentMethod,
+                 (SelectList)ViewBag.PaymentMethod,
+                 "-- Chọn phương thức --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.PaymentMethod, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.PaymentStatus, "Trạng thái thanh toán")
+        @Html.DropDownListFor(m => m.PaymentStatus,
+                 (SelectList)ViewBag.PaymentStatus,
+                 "-- Chọn trạng thái --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.PaymentStatus, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.Note, "Ghi chú")
+        @Html.TextAreaFor(m => m.Note,
+                 new { @class = "form-control", rows = "3" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Lưu hóa đơn
+    </button>
+
+    @Html.ActionLink("Quay lại", "Index", null,
+             new { @class = "btn btn-secondary" })
+</div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

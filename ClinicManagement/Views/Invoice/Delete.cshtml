@@ -1,0 +1,237 @@
+﻿
+@model ClinicManagement.Models.Invoice
+
+@{
+    ViewBag.Title = "Xóa hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    decimal paidAmount = Model.PaidAmount;
+
+    if (Model.PaymentStatus == "Đã thanh toán" && paidAmount <= 0)
+    {
+        paidAmount = Model.TotalAmount;
+    }
+
+    decimal remainingAmount = Model.PaymentStatus == "Đã hủy"
+        ? 0m
+        : Math.Max(0m, Model.TotalAmount - paidAmount);
+}
+
+<style>
+    .delete-page {
+        max-width: 850px;
+        margin: 30px auto;
+    }
+
+    .delete-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .delete-header {
+        background: #dc3545;
+        color: white;
+        padding: 20px 25px;
+    }
+
+        .delete-header h3 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .delete-body {
+        padding: 25px;
+    }
+
+    .delete-warning {
+        padding: 15px;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffe69c;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .delete-table th {
+        width: 35%;
+        background: #f8fafc;
+    }
+
+    .delete-table td,
+    .delete-table th {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .delete-total {
+        color: #263b59;
+        font-weight: 700;
+    }
+
+    .delete-paid {
+        color: #198754;
+        font-weight: 700;
+    }
+
+    .delete-debt {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+    .delete-actions {
+        margin-top: 22px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="container delete-page">
+
+    <div class="delete-card">
+
+        <div class="delete-header">
+            <h3>
+                <i class="glyphicon glyphicon-trash"></i>
+                XÁC NHẬN XÓA HÓA ĐƠN
+            </h3>
+        </div>
+
+        <div class="delete-body">
+
+            <div class="delete-warning">
+                <strong>
+                    <i class="glyphicon glyphicon-warning-sign"></i>
+                    Cảnh báo!
+                </strong>
+
+                <p class="mb-0">
+                    Bạn đang thực hiện xóa hóa đơn.
+                    Hãy kiểm tra kỹ thông tin trước khi xác nhận.
+                </p>
+            </div>
+
+            <h4>Thông tin hóa đơn</h4>
+
+            <div class="table-responsive">
+                <table class="table table-bordered delete-table">
+
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <td><strong>@Model.InvoiceCode</strong></td>
+                    </tr>
+
+                    <tr>
+                        <th>Mã lịch khám</th>
+                        <td>
+                            @(Model.Appointment != null
+                                ? Model.Appointment.AppointmentCode : "Không có dữ liệu")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Bệnh nhân</th>
+                        <td>
+                            @(Model.Appointment != null &&
+                              Model.Appointment.Patient != null
+                                ? Model.Appointment.Patient.FullName : "Không có dữ liệu")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Bác sĩ</th>
+                        <td>
+                            @(Model.Appointment != null &&
+                              Model.Appointment.Doctor != null
+                                ? Model.Appointment.Doctor.FullName : "Không có dữ liệu")
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Ngày lập</th>
+                        <td>@Model.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                    </tr>
+
+                    <tr>
+                        <th>Tổng tiền</th>
+                        <td class="delete-total">
+                            @Model.TotalAmount.ToString("N0") VNĐ
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Đã thanh toán</th>
+                        <td class="delete-paid">
+                            @paidAmount.ToString("N0") VNĐ
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Còn nợ</th>
+                        <td class="delete-debt">
+                            @remainingAmount.ToString("N0") VNĐ
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Phương thức thanh toán</th>
+                        <td>@Model.PaymentMethod</td>
+                    </tr>
+
+                    <tr>
+                        <th>Trạng thái</th>
+                        <td>
+                            @Model.PaymentStatus
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+
+            @if (paidAmount > 0)
+            {
+                <div class="alert alert-danger">
+                    <strong>Không nên xóa hóa đơn này!</strong>
+                    Hóa đơn đã ghi nhận thanh toán.
+                    Hệ thống cần chặn thao tác xóa để bảo toàn dữ liệu kế toán.
+                </div>
+            }
+            else if (Model.PaymentStatus == "Đã hủy")
+            {
+                <div class="alert alert-info">
+                    Đây là hóa đơn đã hủy. Hãy kiểm tra trước khi xóa.
+                </div>
+            }
+
+            <div class="delete-actions">
+
+                @using (Html.BeginForm(
+                    "Delete",
+                    "Invoice",
+                    new { id = Model.InvoiceID },
+                    FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-danger"
+                            onclick="return confirm('Bạn có chắc chắn muốn xóa hóa đơn này?');">
+                        <i class="glyphicon glyphicon-trash"></i>
+                        Xác nhận xóa
+                    </button>
+                }
+
+                @Html.ActionLink(
+                         "Quay lại",
+                         "Index",
+                         null,
+                         new { @class = "btn btn-default" })
+
+            </div>
+
+        </div>
+    </div>
+</div>

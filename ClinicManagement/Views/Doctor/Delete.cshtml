@@ -1,0 +1,41 @@
+﻿
+@model ClinicManagement.Models.Doctor
+
+@{
+    ViewBag.Title = "Xóa bác sĩ";
+}
+
+<h2>Xóa bác sĩ</h2>
+
+<div class="alert alert-warning">
+    Bạn có chắc chắn muốn xóa bác sĩ này không?
+</div>
+
+<dl class="dl-horizontal">
+    <dt>Mã bác sĩ</dt>
+    <dd>@Model.DoctorCode</dd>
+
+    <dt>Họ và tên</dt>
+    <dd>@Model.FullName</dd>
+
+    <dt>Chuyên khoa</dt>
+    <dd>
+        @(Model.SpecialtyNavigation != null
+            ? Model.SpecialtyNavigation.SpecialtyName
+            : Model.Specialty)
+    </dd>
+
+    <dt>Số điện thoại</dt>
+    <dd>@Model.Phone</dd>
+</dl>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <input type="submit" value="Xác nhận xóa"
+           class="btn btn-danger" />
+
+    @Html.ActionLink("Hủy", "Index",
+            null, new { @class = "btn btn-default" })
+}

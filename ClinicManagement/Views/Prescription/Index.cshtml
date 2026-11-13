@@ -1,0 +1,96 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.Prescription>
+
+@{
+    ViewBag.Title = "Quản lý đơn thuốc";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-prescription-bottle-alt"></i> Quản lý đơn thuốc</h2>
+            <p class="text-muted">Danh sách đơn thuốc của phòng khám</p>
+        </div>
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Doctor"))
+        {
+            @Html.ActionLink(" + Tạo đơn thuốc", "Create", null,
+                     new { @class = "btn btn-primary" })
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @using (Html.BeginForm("Index", "Prescription", FormMethod.Get))
+    {
+        <div class="input-group mb-3">
+            <input type="text" name="keyword" class="form-control"
+                   placeholder="Tìm mã đơn, mã hồ sơ hoặc tên bệnh nhân..."
+                   value="@Request.QueryString["keyword"]" />
+
+            <button type="submit" class="btn btn-outline-primary">
+                Tìm kiếm
+            </button>
+
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                Làm mới
+            </a>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã đơn thuốc</th>
+                        <th>Mã hồ sơ</th>
+                        <th>Bệnh nhân</th>
+                        <th>Bác sĩ</th>
+                        <th>Ngày kê đơn</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{
+                        int stt = 1;
+                    }
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@stt</td>
+                            <td><strong>@item.PrescriptionCode</strong></td>
+                            <td>@item.MedicalRecord.RecordCode</td>
+                            <td>@item.MedicalRecord.Appointment.Patient.FullName</td>
+                            <td>@item.MedicalRecord.Appointment.Doctor.FullName</td>
+                            <td>@item.PrescriptionDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @Html.ActionLink("Chi tiết", "Details",
+                                         new { id = item.PrescriptionID },
+                                         new { @class = "btn btn-sm btn-info text-white" })
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                Chưa có đơn thuốc nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

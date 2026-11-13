@@ -1,0 +1,94 @@
+﻿@model IEnumerable<ClinicManagement.Models.Appointment>
+
+@{
+    ViewBag.Title = "Quản lý lịch khám";
+}
+
+<h2>QUẢN LÝ LỊCH KHÁM</h2>
+
+<p>
+    @Html.ActionLink("＋ Đặt lịch khám mới", "Create",
+            null, new { @class = "btn btn-primary" })
+</p>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@using (Html.BeginForm("Index", "Appointment", FormMethod.Get))
+{
+    <div class="form-inline" style="margin-bottom:15px;">
+        <input type="text"
+               name="keyword"
+               value="@ViewBag.Keyword"
+               class="form-control"
+               placeholder="Mã lịch, bệnh nhân hoặc bác sĩ..." />
+
+        @Html.DropDownList(
+                 "status",
+                 (IEnumerable<SelectListItem>)ViewBag.StatusList,
+                 "-- Tất cả trạng thái --",
+                 new { @class = "form-control" })
+
+        <button type="submit" class="btn btn-success">
+            Tìm kiếm
+        </button>
+
+        @Html.ActionLink("Làm mới", "Index",
+                 null, new { @class = "btn btn-default" })
+    </div>
+}
+
+<table class="table table-bordered table-striped">
+    <tr>
+        <th>Mã lịch</th>
+        <th>Bệnh nhân</th>
+        <th>Bác sĩ</th>
+        <th>Ngày khám</th>
+        <th>Giờ khám</th>
+        <th>Lý do khám</th>
+        <th>Trạng thái</th>
+        <th>Chức năng</th>
+    </tr>
+
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.AppointmentCode</td>
+                <td>
+                    @(item.Patient != null
+                        ? item.Patient.FullName : "Không xác định")
+                </td>
+                <td>
+                    @(item.Doctor != null
+                        ? item.Doctor.FullName : "Không xác định")
+                </td>
+                <td>@item.AppointmentDate.ToString("dd/MM/yyyy")</td>
+                <td>@item.AppointmentTime.ToString(@"hh\:mm")</td>
+                <td>@item.Reason</td>
+                <td>@item.Status</td>
+                <td>
+                    @Html.ActionLink("Chi tiết", "Details",
+                             new { id = item.AppointmentID }) |
+                    @Html.ActionLink("Sửa", "Edit",
+                             new { id = item.AppointmentID }) |
+                    @Html.ActionLink("Xóa", "Delete",
+                             new { id = item.AppointmentID })
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="8" class="text-center">
+                Chưa có lịch khám hoặc không tìm thấy kết quả.
+            </td>
+        </tr>
+    }
+</table>

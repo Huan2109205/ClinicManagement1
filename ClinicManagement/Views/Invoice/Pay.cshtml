@@ -1,0 +1,314 @@
+﻿
+@model ClinicManagement.Models.Invoice
+
+@{
+    ViewBag.Title = "Thanh toán hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    decimal paidAmount = Model.PaidAmount;
+
+    // Hỗ trợ hóa đơn cũ đã thanh toán nhưng PaidAmount = 0
+    if (Model.PaymentStatus == "Đã thanh toán" && paidAmount <= 0)
+    {
+        paidAmount = Model.TotalAmount;
+    }
+
+    decimal remaining = Math.Max(0, Model.TotalAmount - paidAmount);
+}
+
+<style>
+    .payment-container {
+        max-width: 850px;
+        margin: 35px auto;
+    }
+
+    .payment-card {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 5px 22px rgba(0,0,0,.08);
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        padding: 22px 28px;
+    }
+
+        .payment-header h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .payment-body {
+        padding: 28px;
+    }
+
+    .invoice-info {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        color: #64748b;
+    }
+
+    .info-value {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .remaining-box {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .remaining-label {
+        color: #9a3412;
+        margin-bottom: 5px;
+    }
+
+    .remaining-amount {
+        color: #ea580c;
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .payment-form label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    .payment-form .form-control {
+        min-height: 44px;
+        border-radius: 8px;
+    }
+
+    .payment-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 25px;
+    }
+
+        .payment-actions .btn {
+            min-width: 150px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+    .payment-note {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 7px;
+    }
+
+    @@media (max-width: 576px) {
+        .payment-body {
+            padding: 18px;
+        }
+
+        .info-row {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="container payment-container">
+    <div class="card payment-card">
+
+        <div class="payment-header">
+            <h4>
+                <i class="fa fa-credit-card"></i>
+                Thanh toán hóa đơn
+            </h4>
+            <small>Ghi nhận khoản thanh toán của bệnh nhân</small>
+        </div>
+
+        <div class="payment-body">
+
+            <h5 class="font-weight-bold mb-3">
+                <i class="fa fa-file-invoice"></i>
+                Thông tin hóa đơn
+            </h5>
+
+            <div class="invoice-info">
+
+                <div class="info-row">
+                    <span class="info-label">Mã hóa đơn</span>
+                    <span class="info-value">@Model.InvoiceCode</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Ngày lập</span>
+                    <span class="info-value">
+                        @Model.InvoiceDate.ToString("dd/MM/yyyy")
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Tổng tiền hóa đơn</span>
+                    <span class="info-value">
+                        @Model.TotalAmount.ToString("N0") VNĐ
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">Đã thanh toán</span>
+                    <span class="info-value text-success">
+                        @paidAmount.ToString("N0") VNĐ
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="remaining-box">
+                <div class="remaining-label">
+                    SỐ TIỀN CÒN PHẢI THANH TOÁN
+                </div>
+
+                <div class="remaining-amount">
+                    @remaining.ToString("N0") VNĐ
+                </div>
+            </div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            }
+
+            @if (remaining <= 0)
+            {
+                <div class="alert alert-success">
+                    Hóa đơn đã được thanh toán đầy đủ.
+                </div>
+
+                @Html.ActionLink(
+                         "Quay lại chi tiết",
+                         "Details",
+                         new { id = Model.InvoiceID },
+                         new { @class = "btn btn-secondary" }
+                     )
+            }
+            else
+            {
+                using (Html.BeginForm(
+                    "Pay",
+                    "Invoice",
+                    FormMethod.Post,
+                    new { @class = "payment-form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @Html.Hidden("id", Model.InvoiceID)
+
+                    <div class="form-group mb-3">
+                        <label for="amount">
+                            Số tiền thanh toán lần này
+                        </label>
+
+                        <input type="number"
+                               id="amount"
+                               name="amount"
+                               class="form-control"
+                               min="1"
+                               max="@remaining"
+                               step="1"
+                               placeholder="Nhập số tiền thanh toán"
+                               required />
+
+                        <div class="payment-note">
+                            Số tiền không được vượt quá
+                            @remaining.ToString("N0") VNĐ.
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="paymentMethod">
+                            Phương thức thanh toán
+                        </label>
+
+                        <select id="paymentMethod"
+                                name="paymentMethod"
+                                class="form-control"
+                                required>
+                            <option value="">-- Chọn phương thức --</option>
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                            <option value="VNPay">VNPay</option>
+                            <option value="Thẻ">Thẻ</option>
+                        </select>
+                    </div>
+
+                    <div class="payment-actions">
+                        <button type="submit"
+                                class="btn btn-success"
+                                onclick="return confirm('Bạn có chắc chắn muốn ghi nhận khoản thanh toán này?');">
+                            <i class="fa fa-check-circle"></i>
+                            Xác nhận thanh toán
+                        </button>
+
+                        @Html.ActionLink(
+                                 "Quay lại",
+                                 "Details",
+                                 new { id = Model.InvoiceID },
+                                 new { @class = "btn btn-secondary" }
+                             )
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+</div>
+
+<script>(function () {
+        var amountInput = document.getElementById("amount");
+
+        if (amountInput) {
+            amountInput.addEventListener("input", function () {
+                var max = Number(this.max);
+                var value = Number(this.value);
+
+                if (value > max) {
+                    this.setCustomValidity(
+                        "Số tiền không được vượt quá số tiền còn nợ."
+                    );
+                } else if (value <= 0) {
+                    this.setCustomValidity(
+                        "Số tiền phải lớn hơn 0."
+                    );
+                } else {
+                    this.setCustomValidity("");
+                }
+            });
+        }
+    })();</script>

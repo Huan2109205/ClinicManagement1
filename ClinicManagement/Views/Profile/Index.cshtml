@@ -1,0 +1,88 @@
+﻿
+@model ClinicManagement.Models.DoctorProfileViewModel
+
+@{
+    ViewBag.Title = "Hồ sơ cá nhân";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">HỒ SƠ CÁ NHÂN BÁC SĨ</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @using (Html.BeginForm("Index", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.DoctorCode, "Mã bác sĩ")
+                    @Html.TextBoxFor(m => m.DoctorCode,
+                             new { @class = "form-control", @readonly = "readonly" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.FullName, "Họ và tên")
+                    @Html.TextBoxFor(m => m.FullName,
+                             new { @class = "form-control", @readonly = "readonly" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.SpecialtyName, "Chuyên khoa")
+                    @Html.TextBoxFor(m => m.SpecialtyName,
+                             new { @class = "form-control", @readonly = "readonly" })
+                </div>
+
+                <hr />
+
+                <h5>Thông tin liên hệ</h5>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Phone, "Số điện thoại")
+                    @Html.TextBoxFor(m => m.Phone,
+                             new { @class = "form-control", placeholder = "Nhập số điện thoại" })
+                    @Html.ValidationMessageFor(m => m.Phone, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Email, "Email")
+                    @Html.TextBoxFor(m => m.Email,
+                             new { @class = "form-control", placeholder = "Nhập email" })
+                    @Html.ValidationMessageFor(m => m.Email, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Address, "Địa chỉ")
+                    @Html.TextAreaFor(m => m.Address, 3, 50,
+                             new { @class = "form-control", placeholder = "Nhập địa chỉ" })
+                    @Html.ValidationMessageFor(m => m.Address, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="glyphicon glyphicon-save"></i> Cập nhật hồ sơ
+                </button>
+
+                <a href="@Url.Action("Index", "Dashboard")"
+                   class="btn btn-secondary">
+                    Quay lại
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

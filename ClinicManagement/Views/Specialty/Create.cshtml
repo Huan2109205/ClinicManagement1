@@ -1,0 +1,55 @@
+﻿
+@model ClinicManagement.Models.Specialty
+
+@{
+    ViewBag.Title = "Thêm chuyên khoa";
+}
+
+<h2>THÊM CHUYÊN KHOA</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.SpecialtyCode, "Mã chuyên khoa")
+        @Html.TextBoxFor(m => m.SpecialtyCode,
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.SpecialtyCode,
+                 "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.SpecialtyName, "Tên chuyên khoa")
+        @Html.TextBoxFor(m => m.SpecialtyName,
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.SpecialtyName,
+                 "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Description, "Mô tả")
+        @Html.TextAreaFor(m => m.Description,
+                 new { @class = "form-control", rows = 4 })
+    </div>
+
+    <div class="checkbox">
+        <label>
+            @Html.CheckBoxFor(m => m.IsActive)
+            Đang hoạt động
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Lưu chuyên khoa
+    </button>
+
+    @Html.ActionLink("Quay lại", "Index", null,
+            new { @class = "btn btn-default" })
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,544 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.Invoice>
+
+@{
+    ViewBag.Title = "Quản lý hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var invoices = Model ?? Enumerable.Empty<ClinicManagement.Models.Invoice>();
+
+    int totalInvoices = invoices.Count();
+    decimal totalRevenue = invoices
+        .Where(x => x.PaymentStatus != "Đã hủy")
+        .Sum(x => x.TotalAmount);
+
+    decimal totalCollected = invoices
+        .Where(x => x.PaymentStatus != "Đã hủy")
+        .Sum(x => x.PaymentStatus == "Đã thanh toán" && x.PaidAmount <= 0
+            ? x.TotalAmount : x.PaidAmount);
+
+    decimal totalDebt = invoices
+        .Where(x => x.PaymentStatus != "Đã hủy")
+        .Sum(x => Math.Max(0m, x.TotalAmount -
+            (x.PaymentStatus == "Đã thanh toán" && x.PaidAmount <= 0
+                ? x.TotalAmount : x.PaidAmount)));
+}
+
+<style>
+    .invoice-page {
+        padding-bottom: 30px;
+    }
+
+    .invoice-heading {
+        font-size: 25px;
+        font-weight: 800;
+        color: #263445;
+        margin-bottom: 5px;
+    }
+
+    .invoice-subtitle {
+        color: #8491a3;
+        margin-bottom: 25px;
+    }
+
+    .invoice-stat {
+        background: #fff;
+        border-radius: 10px;
+        padding: 18px;
+        border: 1px solid #e8edf3;
+        box-shadow: 0 3px 12px rgba(0,0,0,.04);
+        height: 100%;
+        margin-bottom: 15px;
+    }
+
+    .invoice-stat-label {
+        color: #7b8794;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .invoice-stat-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #263445;
+    }
+
+    .stat-blue {
+        color: #2563eb;
+    }
+
+    .stat-green {
+        color: #198754;
+    }
+
+    .stat-orange {
+        color: #ea580c;
+    }
+
+    .invoice-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .invoice-filter {
+        background: #fff;
+        padding: 18px;
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .invoice-table-wrapper {
+        background: #fff;
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.04);
+    }
+
+    .invoice-table {
+        min-width: 1250px;
+        margin-bottom: 0;
+        font-size: 13px;
+    }
+
+        .invoice-table thead th {
+            background: #263b59;
+            color: white;
+            white-space: nowrap;
+            vertical-align: middle;
+            padding: 13px 10px;
+        }
+
+        .invoice-table tbody td {
+            vertical-align: middle;
+            padding: 12px 10px;
+        }
+
+    .invoice-code {
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .money-total {
+        font-weight: 700;
+        color: #263445;
+        white-space: nowrap;
+    }
+
+    .money-paid {
+        color: #198754;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .money-debt {
+        color: #dc3545;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-label {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-partial {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-unpaid {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .invoice-actions {
+        min-width: 250px;
+    }
+
+        .invoice-actions .btn {
+            margin: 2px;
+        }
+
+    .empty-invoices {
+        padding: 35px !important;
+        color: #8491a3;
+        text-align: center;
+    }
+
+    @@media(max-width: 767px) {
+        .invoice-heading {
+            font-size: 21px;
+        }
+
+        .invoice-stat-value {
+            font-size: 19px;
+        }
+    }
+</style>
+
+<div class="container-fluid invoice-page">
+
+    <div class="mb-4">
+        <h2 class="invoice-heading">
+            <i class="glyphicon glyphicon-list-alt"></i>
+            QUẢN LÝ HÓA ĐƠN
+        </h2>
+
+        <p class="invoice-subtitle">
+            Quản lý hóa đơn, theo dõi thanh toán và công nợ bệnh nhân.
+        </p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="glyphicon glyphicon-ok-circle"></i>
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="glyphicon glyphicon-exclamation-sign"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- THỐNG KÊ -->
+    <div class="row">
+
+        <div class="col-md-4 col-sm-6">
+            <div class="invoice-stat">
+                <div class="invoice-stat-label">
+                    <i class="glyphicon glyphicon-list"></i>
+                    Tổng số hóa đơn
+                </div>
+                <div class="invoice-stat-value stat-blue">
+                    @totalInvoices
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <div class="invoice-stat">
+                <div class="invoice-stat-label">
+                    <i class="glyphicon glyphicon-usd"></i>
+                    Tổng tiền đã thu
+                </div>
+                <div class="invoice-stat-value stat-green">
+                    @totalCollected.ToString("N0") VNĐ
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <div class="invoice-stat">
+                <div class="invoice-stat-label">
+                    <i class="glyphicon glyphicon-time"></i>
+                    Tổng công nợ còn lại
+                </div>
+                <div class="invoice-stat-value stat-orange">
+                    @totalDebt.ToString("N0") VNĐ
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- THANH CÔNG CỤ -->
+    <div class="invoice-toolbar">
+
+        <div>
+            <strong>Danh sách hóa đơn</strong>
+            <span class="text-muted">
+                (@totalInvoices hóa đơn)
+            </span>
+        </div>
+
+        <div>
+            @Html.ActionLink(
+                     "+ Thêm hóa đơn",
+                     "Create",
+                     null,
+                     new { @class = "btn btn-primary" })
+        </div>
+
+    </div>
+
+    <!-- TÌM KIẾM VÀ LỌC -->
+    <div class="invoice-filter">
+
+        @using (Html.BeginForm("Index", "Invoice", FormMethod.Get))
+        {
+            <div class="row">
+
+                <div class="col-md-5 col-sm-12 mb-2">
+                    <label>Từ khóa tìm kiếm</label>
+
+                    <input type="text"
+                           name="keyword"
+                           value="@ViewBag.Keyword"
+                           class="form-control"
+                           placeholder="Mã hóa đơn, lịch khám, bệnh nhân, bác sĩ..." />
+                </div>
+
+                <div class="col-md-4 col-sm-8 mb-2">
+                    <label>Trạng thái thanh toán</label>
+
+                    <select name="paymentStatus" class="form-control">
+                        <option value="">-- Tất cả trạng thái --</option>
+
+                        <option value="Chưa thanh toán"
+                                @(ViewBag.PaymentStatusFilter == "Chưa thanh toán" ? "selected" : "")>
+                            Chưa thanh toán
+                        </option>
+
+                        <option value="Thanh toán một phần"
+                                @(ViewBag.PaymentStatusFilter == "Thanh toán một phần" ? "selected" : "")>
+                            Thanh toán một phần
+                        </option>
+
+                        <option value="Đã thanh toán"
+                                @(ViewBag.PaymentStatusFilter == "Đã thanh toán" ? "selected" : "")>
+                            Đã thanh toán
+                        </option>
+
+                        <option value="Đã hủy"
+                                @(ViewBag.PaymentStatusFilter == "Đã hủy" ? "selected" : "")>
+                            Đã hủy
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 col-sm-4 mb-2">
+                    <label>&nbsp;</label>
+
+                    <div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="glyphicon glyphicon-search"></i>
+                            Tìm kiếm
+                        </button>
+
+                        @Html.ActionLink(
+                                 "Làm mới",
+                                 "Index",
+                                 null,
+                                 new { @class = "btn btn-default" })
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- BẢNG HÓA ĐƠN -->
+    <div class="invoice-table-wrapper">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped table-hover invoice-table">
+
+                <thead>
+                    <tr>
+                        <th>Mã hóa đơn</th>
+                        <th>Mã lịch khám</th>
+                        <th>Bệnh nhân</th>
+                        <th>Bác sĩ</th>
+                        <th>Ngày lập</th>
+                        <th>Tổng tiền</th>
+                        <th>Đã trả</th>
+                        <th>Còn nợ</th>
+                        <th>Phương thức</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (invoices.Any())
+                    {
+                        foreach (var item in invoices)
+                        {
+                            decimal rowPaid = item.PaidAmount;
+
+                            if (item.PaymentStatus == "Đã thanh toán" && rowPaid <= 0)
+                            {
+                                rowPaid = item.TotalAmount;
+                            }
+
+                            decimal rowRemaining = item.PaymentStatus == "Đã hủy"
+                                ? 0m
+                                : Math.Max(0m, item.TotalAmount - rowPaid);
+
+                            <tr>
+
+                                <td>
+                                    <span class="invoice-code">
+                                        @item.InvoiceCode
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @(item.Appointment != null
+                                        ? item.Appointment.AppointmentCode : "")
+                                </td>
+
+                                <td>
+                                    @(item.Appointment != null &&
+                                      item.Appointment.Patient != null
+                                        ? item.Appointment.Patient.FullName : "")
+                                </td>
+
+                                <td>
+                                    @(item.Appointment != null &&
+                                      item.Appointment.Doctor != null
+                                        ? item.Appointment.Doctor.FullName : "")
+                                </td>
+
+                                <td>
+                                    @item.InvoiceDate.ToString("dd/MM/yyyy")
+                                </td>
+
+                                <td class="money-total">
+                                    @item.TotalAmount.ToString("N0") VNĐ
+                                </td>
+
+                                <td class="money-paid">
+                                    @rowPaid.ToString("N0") VNĐ
+                                </td>
+
+                                <td class="money-debt">
+                                    @rowRemaining.ToString("N0") VNĐ
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.PaymentMethod)
+                                        ? "Chưa ghi nhận" : item.PaymentMethod)
+                                </td>
+
+                                <td>
+                                    @if (item.PaymentStatus == "Đã thanh toán")
+                                    {
+                                        <span class="status-label status-paid">
+                                            Đã thanh toán
+                                        </span>
+                                    }
+                                    else if (item.PaymentStatus == "Thanh toán một phần")
+                                    {
+                                        <span class="status-label status-partial">
+                                            Thanh toán một phần
+                                        </span>
+                                    }
+                                    else if (item.PaymentStatus == "Đã hủy")
+                                    {
+                                        <span class="status-label status-cancelled">
+                                            Đã hủy
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-label status-unpaid">
+                                            Chưa thanh toán
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="invoice-actions">
+
+                                    @Html.ActionLink(
+                                                  "Chi tiết",
+                                                  "Details",
+                                                  new { id = item.InvoiceID },
+                                                  new { @class = "btn btn-info btn-sm" })
+
+                                    @if (item.PaymentStatus != "Đã hủy")
+                                    {
+                                        @Html.ActionLink(
+                                                      "Sửa",
+                                                      "Edit",
+                                                      new { id = item.InvoiceID },
+                                                      new { @class = "btn btn-warning btn-sm" })
+                                    }
+
+                                    @if (rowRemaining > 0 &&
+                                         item.PaymentStatus != "Đã hủy")
+                                    {
+                                        @Html.ActionLink(
+                                                      "Thanh toán",
+                                                      "Pay",
+                                                      new { id = item.InvoiceID },
+                                                      new { @class = "btn btn-success btn-sm" })
+                                    }
+
+                                    @Html.ActionLink(
+                                                  "In",
+                                                  "Print",
+                                                  new { id = item.InvoiceID },
+                                                  new
+                                                  {
+                                                      @class = "btn btn-primary btn-sm",
+                                                      target = "_blank"
+                                                  })
+
+                                    @if (rowPaid <= 0)
+                                    {
+                                        @Html.ActionLink(
+                                                "Xóa",
+                                                "Delete",
+                                                new { id = item.InvoiceID },
+                                                new { @class = "btn btn-danger btn-sm" })
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="empty-invoices">
+                                <i class="glyphicon glyphicon-inbox"
+                                   style="font-size:30px;"></i>
+
+                                <p class="mt-2">
+                                    Không tìm thấy hóa đơn phù hợp.
+                                </p>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

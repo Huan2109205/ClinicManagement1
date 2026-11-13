@@ -1,0 +1,361 @@
+﻿
+@model ClinicManagement.Models.Invoice
+
+@{
+    ViewBag.Title = "Chi tiết hóa đơn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    decimal paidAmount = Model.PaidAmount;
+
+    if (Model.PaymentStatus == "Đã thanh toán" && paidAmount <= 0)
+    {
+        paidAmount = Model.TotalAmount;
+    }
+
+    decimal remaining = Model.PaymentStatus == "Đã hủy"
+        ? 0m
+        : Math.Max(0m, Model.TotalAmount - paidAmount);
+}
+
+<style>
+    .invoice-detail {
+        max-width: 1000px;
+        margin: 30px auto;
+    }
+
+    .invoice-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
+
+    .invoice-header {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        padding: 22px 25px;
+    }
+
+        .invoice-header h3 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .invoice-body {
+        padding: 25px;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #263445;
+        margin: 22px 0 12px;
+    }
+
+    .detail-table th {
+        width: 35%;
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .detail-table td,
+    .detail-table th {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .amount-box {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .amount-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+    }
+
+        .amount-item small {
+            display: block;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .amount-item strong {
+            font-size: 19px;
+        }
+
+    .total-amount strong {
+        color: #dc2626;
+    }
+
+    .paid-amount strong {
+        color: #16a34a;
+    }
+
+    .remaining-amount strong {
+        color: #ea580c;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 7px 13px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-partial {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-unpaid {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .invoice-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+        .invoice-actions .btn {
+            min-width: 125px;
+            border-radius: 7px;
+            font-weight: 600;
+        }
+
+    @@media(max-width: 768px) {
+        .amount-box {
+            grid-template-columns: 1fr;
+        }
+
+        .invoice-body {
+            padding: 15px;
+        }
+
+        .detail-table th {
+            width: 42%;
+        }
+    }
+</style>
+
+<div class="container invoice-detail">
+    <div class="card invoice-card">
+
+        <div class="invoice-header">
+            <h3>
+                <i class="fa fa-file-invoice"></i>
+                CHI TIẾT HÓA ĐƠN
+            </h3>
+            <small>Thông tin và tình trạng thanh toán</small>
+        </div>
+
+        <div class="invoice-body">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fa fa-check-circle"></i>
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-circle"></i>
+                    @TempData["Error"]
+                </div>
+            }
+
+            <h5 class="section-title">1. Thông tin hóa đơn</h5>
+
+            <table class="table table-bordered detail-table">
+                <tr>
+                    <th>Mã hóa đơn</th>
+                    <td><strong>@Model.InvoiceCode</strong></td>
+                </tr>
+                <tr>
+                    <th>Mã lịch khám</th>
+                    <td>
+                        @(Model.Appointment != null
+                            ? Model.Appointment.AppointmentCode : "")
+                    </td>
+                </tr>
+                <tr>
+                    <th>Ngày lập hóa đơn</th>
+                    <td>@Model.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                </tr>
+                <tr>
+                    <th>Ngày khám</th>
+                    <td>
+                        @(Model.Appointment != null
+                            ? Model.Appointment.AppointmentDate.ToString("dd/MM/yyyy")
+                            : "")
+                    </td>
+                </tr>
+            </table>
+
+            <h5 class="section-title">2. Thông tin bệnh nhân và bác sĩ</h5>
+
+            <table class="table table-bordered detail-table">
+                <tr>
+                    <th>Bệnh nhân</th>
+                    <td>
+                        @(Model.Appointment != null &&
+                          Model.Appointment.Patient != null
+                            ? Model.Appointment.Patient.FullName : "")
+                    </td>
+                </tr>
+                <tr>
+                    <th>Bác sĩ</th>
+                    <td>
+                        @(Model.Appointment != null &&
+                          Model.Appointment.Doctor != null
+                            ? Model.Appointment.Doctor.FullName : "")
+                    </td>
+                </tr>
+            </table>
+
+            <h5 class="section-title">3. Chi tiết chi phí</h5>
+
+            <table class="table table-bordered detail-table">
+                <tr>
+                    <th>Tiền khám</th>
+                    <td>@Model.ConsultationFee.ToString("N0") VNĐ</td>
+                </tr>
+                <tr>
+                    <th>Tiền thuốc</th>
+                    <td>@Model.MedicineAmount.ToString("N0") VNĐ</td>
+                </tr>
+            </table>
+
+            <div class="amount-box">
+
+                <div class="amount-item total-amount">
+                    <small>Tổng tiền hóa đơn</small>
+                    <strong>@Model.TotalAmount.ToString("N0") VNĐ</strong>
+                </div>
+
+                <div class="amount-item paid-amount">
+                    <small>Đã thanh toán</small>
+                    <strong>@paidAmount.ToString("N0") VNĐ</strong>
+                </div>
+
+                <div class="amount-item remaining-amount">
+                    <small>Còn phải thanh toán</small>
+                    <strong>@remaining.ToString("N0") VNĐ</strong>
+                </div>
+
+            </div>
+
+            <h5 class="section-title">4. Thông tin thanh toán</h5>
+
+            <table class="table table-bordered detail-table">
+                <tr>
+                    <th>Phương thức thanh toán</th>
+                    <td>
+                        @(string.IsNullOrWhiteSpace(Model.PaymentMethod)
+                            ? "Chưa ghi nhận" : Model.PaymentMethod)
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Trạng thái</th>
+                    <td>
+                        @if (Model.PaymentStatus == "Đã thanh toán")
+                        {
+                            <span class="status-badge status-paid">
+                                Đã thanh toán
+                            </span>
+                        }
+                        else if (Model.PaymentStatus == "Thanh toán một phần")
+                        {
+                            <span class="status-badge status-partial">
+                                Thanh toán một phần
+                            </span>
+                        }
+                        else if (Model.PaymentStatus == "Đã hủy")
+                        {
+                            <span class="status-badge status-cancelled">
+                                Đã hủy
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-unpaid">
+                                Chưa thanh toán
+                            </span>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Ghi chú</th>
+                    <td>
+                        @(string.IsNullOrWhiteSpace(Model.Note)
+                            ? "Không có ghi chú" : Model.Note)
+                    </td>
+                </tr>
+            </table>
+
+            <div class="invoice-actions">
+
+                @if (remaining > 0 &&
+                     Model.PaymentStatus != "Đã hủy")
+                {
+                    @Html.ActionLink(
+                             "Thanh toán",
+                             "Pay",
+                             new { id = Model.InvoiceID },
+                             new { @class = "btn btn-success" }
+                         )
+                }
+
+                @if (Model.PaymentStatus != "Đã hủy")
+                {
+                    @Html.ActionLink(
+                             "Chỉnh sửa",
+                             "Edit",
+                             new { id = Model.InvoiceID },
+                             new { @class = "btn btn-warning" }
+                         )
+                }
+
+                @Html.ActionLink(
+                         "In hóa đơn",
+                         "Print",
+                         new { id = Model.InvoiceID },
+                         new { @class = "btn btn-info" }
+                     )
+
+                @Html.ActionLink(
+                         "Quay lại",
+                         "Index",
+                         null,
+                         new { @class = "btn btn-secondary" }
+                     )
+
+            </div>
+
+        </div>
+    </div>
+</div>

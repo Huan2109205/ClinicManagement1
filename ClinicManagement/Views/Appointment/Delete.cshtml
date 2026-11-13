@@ -1,0 +1,61 @@
+﻿@model ClinicManagement.Models.Appointment
+
+@{
+    ViewBag.Title = "Xóa lịch khám";
+}
+
+<h2>XÓA LỊCH KHÁM</h2>
+
+<div class="alert alert-warning">
+    <strong>Cảnh báo!</strong>
+    Bạn có chắc chắn muốn xóa lịch khám này không?
+</div>
+
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        <strong>Thông tin lịch khám cần xóa</strong>
+    </div>
+
+    <div class="panel-body">
+        <dl class="dl-horizontal">
+            <dt>Mã lịch khám</dt>
+            <dd>@Model.AppointmentCode</dd>
+
+            <dt>Bệnh nhân</dt>
+            <dd>
+                @(Model.Patient != null
+                ? Model.Patient.FullName : "Không xác định")
+            </dd>
+
+            <dt>Bác sĩ</dt>
+            <dd>
+                @(Model.Doctor != null
+                ? Model.Doctor.FullName : "Không xác định")
+            </dd>
+
+            <dt>Ngày khám</dt>
+            <dd>@Model.AppointmentDate.ToString("dd/MM/yyyy")</dd>
+
+            <dt>Giờ khám</dt>
+            <dd>@Model.AppointmentTime.ToString(@"hh\:mm")</dd>
+
+            <dt>Trạng thái</dt>
+            <dd>@Model.Status</dd>
+        </dl>
+    </div>
+</div>
+
+@using (Html.BeginForm("Delete", "Appointment",
+    new { id = Model.AppointmentID }, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <button type="submit"
+            class="btn btn-danger"
+            onclick="return confirm('Bạn chắc chắn muốn xóa lịch khám này?');">
+        Xác nhận xóa
+    </button>
+
+    @Html.ActionLink("Hủy", "Index",
+            null, new { @class = "btn btn-default" })
+}

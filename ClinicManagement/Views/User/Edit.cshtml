@@ -1,0 +1,345 @@
+﻿
+@model ClinicManagement.Models.User
+
+@{
+    ViewBag.Title = "Sửa tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .user-edit-page {
+        padding: 25px 0;
+    }
+
+    .user-edit-header {
+        margin-bottom: 25px;
+    }
+
+        .user-edit-header h2 {
+            color: #263f5b;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .user-edit-header p {
+            color: #7b8794;
+            margin-bottom: 0;
+        }
+
+    .user-edit-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 4px 15px rgba(0,0,0,.07);
+        max-width: 850px;
+    }
+
+    .form-section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #263f5b;
+        border-bottom: 1px solid #e5eaf0;
+        padding-bottom: 12px;
+        margin-bottom: 22px;
+    }
+
+    .user-edit-card label {
+        font-weight: 600;
+        color: #34495e;
+        margin-bottom: 8px;
+    }
+
+    .user-edit-card .form-control,
+    .user-edit-card .form-select {
+        min-height: 43px;
+        border-radius: 7px;
+    }
+
+        .user-edit-card .form-control:focus,
+        .user-edit-card .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 .15rem rgba(52,152,219,.15);
+        }
+
+    .doctor-section {
+        background: #f1f7fc;
+        border: 1px solid #d6eaf8;
+        border-radius: 9px;
+        padding: 18px;
+        margin-top: 15px;
+    }
+
+    .status-box {
+        border-radius: 8px;
+        padding: 13px 16px;
+        background: #f4f6f8;
+        border: 1px solid #e5eaf0;
+    }
+
+    .status-active {
+        color: #196b3b;
+        font-weight: 700;
+    }
+
+    .status-locked {
+        color: #922b21;
+        font-weight: 700;
+    }
+
+    .user-edit-actions {
+        border-top: 1px solid #e5eaf0;
+        margin-top: 25px;
+        padding-top: 20px;
+    }
+
+    @@media(max-width:576px) {
+        .user-edit-card {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="container user-edit-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="user-edit-header">
+        <h2>SỬA THÔNG TIN TÀI KHOẢN</h2>
+        <p>Cập nhật thông tin cá nhân và quyền sử dụng hệ thống.</p>
+    </div>
+
+    <div class="user-edit-card">
+
+        @using (Html.BeginForm(
+            "Edit",
+            "User",
+            FormMethod.Post,
+            new { id = "editUserForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.UserID)
+
+            @Html.ValidationSummary(
+                     false,
+                     "Vui lòng kiểm tra các lỗi sau:",
+                     new { @class = "alert alert-danger" }
+                 )
+
+            <div class="form-section-title">
+                Thông tin tài khoản
+            </div>
+
+            <!-- TÊN ĐĂNG NHẬP -->
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.Username, "Tên đăng nhập")
+
+                @Html.TextBoxFor(
+                         m => m.Username,
+                         new
+                         {
+                             @class = "form-control",
+                             placeholder = "Nhập tên đăng nhập",
+                             maxlength = "50",
+                             required = "required"
+                         }
+                     )
+
+                @Html.ValidationMessageFor(
+                         m => m.Username,
+                         "",
+                         new { @class = "text-danger" }
+                     )
+            </div>
+
+            <!-- HỌ TÊN -->
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.FullName, "Họ và tên")
+
+                @Html.TextBoxFor(
+                         m => m.FullName,
+                         new
+                         {
+                             @class = "form-control",
+                             placeholder = "Nhập họ và tên",
+                             maxlength = "100"
+                         }
+                     )
+
+                @Html.ValidationMessageFor(
+                         m => m.FullName,
+                         "",
+                         new { @class = "text-danger" }
+                     )
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.Email, "Địa chỉ Email")
+
+                @Html.TextBoxFor(
+                         m => m.Email,
+                         new
+                         {
+                             @class = "form-control",
+                             type = "email",
+                             placeholder = "example@gmail.com",
+                             maxlength = "100"
+                         }
+                     )
+
+                @Html.ValidationMessageFor(
+                         m => m.Email,
+                         "",
+                         new { @class = "text-danger" }
+                     )
+            </div>
+
+            <div class="form-section-title mt-4">
+                Phân quyền tài khoản
+            </div>
+
+            <!-- QUYỀN -->
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.RoleID, "Vai trò người dùng")
+
+                @Html.DropDownList(
+                         "RoleID",
+                         (SelectList)ViewBag.RoleID,
+                         "-- Chọn quyền --",
+                         new
+                         {
+                             @class = "form-select",
+                             id = "RoleID",
+                             required = "required"
+                         }
+                     )
+
+                @Html.ValidationMessageFor(
+                         m => m.RoleID,
+                         "",
+                         new { @class = "text-danger" }
+                     )
+            </div>
+
+            <!-- LIÊN KẾT BÁC SĨ -->
+            <div class="doctor-section"
+                 id="doctorSection"
+                 style="display:none;">
+
+                <div class="form-group mb-2">
+                    <label for="DoctorID">
+                        Hồ sơ bác sĩ liên kết
+                    </label>
+
+                    @Html.DropDownListFor(
+                             m => m.DoctorID,
+                             (SelectList)ViewBag.DoctorID,
+                             "-- Chọn bác sĩ --",
+                             new
+                             {
+                                 @class = "form-select",
+                                 id = "DoctorID"
+                             }
+                         )
+
+                    @Html.ValidationMessageFor(
+                             m => m.DoctorID,
+                             "",
+                             new { @class = "text-danger" }
+                         )
+
+                    <small class="text-muted">
+                        Tài khoản Doctor phải liên kết với một hồ sơ bác sĩ
+                        đang hoạt động.
+                    </small>
+                </div>
+            </div>
+
+            <!-- TRẠNG THÁI -->
+            <div class="form-group mt-4">
+                <label>Trạng thái hiện tại</label>
+
+                <div class="status-box">
+                    @if (Model.IsActive)
+                    {
+                        <span class="status-active">
+                            ● Đang hoạt động
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-locked">
+                            ● Đã khóa
+                        </span>
+                    }
+                </div>
+
+                <small class="text-muted">
+                    Muốn thay đổi trạng thái, hãy sử dụng chức năng
+                    Khóa/Mở khóa tại danh sách tài khoản.
+                </small>
+            </div>
+
+            <!-- NÚT -->
+            <div class="user-edit-actions d-flex flex-wrap">
+
+                <button type="submit"
+                        class="btn btn-primary mr-2 mb-2">
+                    Lưu thay đổi
+                </button>
+
+                @Html.ActionLink(
+                         "Quay lại",
+                         "Index",
+                         "User",
+                         null,
+                         new { @class = "btn btn-secondary mb-2" }
+                     )
+
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>document.addEventListener("DOMContentLoaded", function () {
+
+            var roleSelect = document.getElementById("RoleID");
+            var doctorSection = document.getElementById("doctorSection");
+            var doctorSelect = document.getElementById("DoctorID");
+
+            function updateDoctorSection() {
+
+                if (!roleSelect || !doctorSection) return;
+
+                var selectedOption =
+                    roleSelect.options[roleSelect.selectedIndex];
+
+                var roleName = selectedOption
+                    ? selectedOption.text.trim()
+                    : "";
+
+                var isDoctor =
+                    roleName.toLowerCase() === "doctor";
+
+                doctorSection.style.display =
+                    isDoctor ? "block" : "none";
+
+                if (doctorSelect) {
+                    doctorSelect.required = isDoctor;
+
+                    if (!isDoctor) {
+                        doctorSelect.value = "";
+                    }
+                }
+            }
+
+            if (roleSelect) {
+                roleSelect.addEventListener(
+                    "change",
+                    updateDoctorSection
+                );
+
+                updateDoctorSection();
+            }
+        });</script>
+}

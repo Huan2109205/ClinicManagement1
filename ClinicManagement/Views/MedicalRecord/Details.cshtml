@@ -1,0 +1,71 @@
+﻿
+@model ClinicManagement.Models.MedicalRecord
+
+@{
+    ViewBag.Title = "Chi tiết hồ sơ khám bệnh";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4>CHI TIẾT HỒ SƠ KHÁM BỆNH</h4>
+        </div>
+
+        <div class="card-body">
+            <h5>Thông tin chung</h5>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Mã hồ sơ</th>
+                    <td>@Model.RecordCode</td>
+                </tr>
+                <tr>
+                    <th>Mã lịch khám</th>
+                    <td>@Model.Appointment.AppointmentCode</td>
+                </tr>
+                <tr>
+                    <th>Bệnh nhân</th>
+                    <td>@Model.Appointment.Patient.FullName</td>
+                </tr>
+                <tr>
+                    <th>Bác sĩ</th>
+                    <td>@Model.Appointment.Doctor.FullName</td>
+                </tr>
+                <tr>
+                    <th>Ngày khám</th>
+                    <td>@Model.Appointment.AppointmentDate.ToString("dd/MM/yyyy")</td>
+                </tr>
+                <tr>
+                    <th>Ngày lập hồ sơ</th>
+                    <td>@Model.RecordDate.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            </table>
+
+            <h5 class="mt-4">Nội dung khám bệnh</h5>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Triệu chứng</th>
+                    <td>@Model.Symptoms</td>
+                </tr>
+                <tr>
+                    <th>Chẩn đoán</th>
+                    <td>@Model.Diagnosis</td>
+                </tr>
+                <tr>
+                    <th>Phương pháp điều trị</th>
+                    <td>@Model.Treatment</td>
+                </tr>
+                <tr>
+                    <th>Lời dặn bác sĩ</th>
+                    <td>@Model.DoctorAdvice</td>
+                </tr>
+                <tr>
+                    <th>Ghi chú</th>
+                    <td>@Model.Note</td>
+                </tr>
+            </table>
+
+            @Html.ActionLink("Quay lại danh sách", "Index", null,
+                     new { @class = "btn btn-secondary" })
+        </div>
+    </div>
+</div>

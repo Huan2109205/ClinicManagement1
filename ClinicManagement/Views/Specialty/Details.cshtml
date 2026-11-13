@@ -1,0 +1,36 @@
+﻿
+@model ClinicManagement.Models.Specialty
+
+@{
+    ViewBag.Title = "Chi tiết chuyên khoa";
+}
+
+<h2>CHI TIẾT CHUYÊN KHOA</h2>
+
+<hr />
+
+<dl class="dl-horizontal">
+    <dt>Mã chuyên khoa</dt>
+    <dd>@Model.SpecialtyCode</dd>
+
+    <dt>Tên chuyên khoa</dt>
+    <dd>@Model.SpecialtyName</dd>
+
+    <dt>Mô tả</dt>
+    <dd>@Model.Description</dd>
+
+    <dt>Trạng thái</dt>
+    <dd>@(Model.IsActive ? "Đang hoạt động" : "Ngừng hoạt động")</dd>
+
+    <dt>Số bác sĩ</dt>
+    <dd>@ViewBag.DoctorCount</dd>
+</dl>
+
+<p>
+    @Html.ActionLink("Sửa", "Edit",
+            new { id = Model.SpecialtyID },
+            new { @class = "btn btn-primary" })
+
+    @Html.ActionLink("Quay lại", "Index",
+            null, new { @class = "btn btn-default" })
+</p>

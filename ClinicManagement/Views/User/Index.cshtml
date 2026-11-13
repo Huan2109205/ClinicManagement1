@@ -1,0 +1,406 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.User>
+
+@{
+    ViewBag.Title = "Quản lý tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var users = Model ?? Enumerable.Empty<ClinicManagement.Models.User>();
+
+    int totalUsers = users.Count();
+    int activeUsers = users.Count(u => u.IsActive);
+    int lockedUsers = totalUsers - activeUsers;
+    int doctorUsers = users.Count(u =>
+        u.Role != null && u.Role.RoleName == "Doctor");
+}
+
+<style>
+    .user-page {
+        padding: 20px 0;
+    }
+
+    .user-title {
+        color: #263445;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .user-subtitle {
+        color: #7b8794;
+        margin-bottom: 25px;
+    }
+
+    .user-stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+        min-height: 115px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.07);
+    }
+
+        .user-stat-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 8px 0 0;
+        }
+
+    .stat-blue {
+        background: linear-gradient(135deg, #2980b9, #1f618d);
+    }
+
+    .stat-green {
+        background: linear-gradient(135deg, #27ae60, #1e8449);
+    }
+
+    .stat-red {
+        background: linear-gradient(135deg, #e74c3c, #a93226);
+    }
+
+    .stat-purple {
+        background: linear-gradient(135deg, #8e44ad, #633974);
+    }
+
+    .user-panel {
+        background: #fff;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        margin-top: 25px;
+    }
+
+    .user-table {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+        .user-table thead th {
+            background: #263f5b;
+            color: white;
+            white-space: nowrap;
+            vertical-align: middle;
+            padding: 13px 10px;
+        }
+
+        .user-table tbody td {
+            padding: 12px 10px;
+        }
+
+        .user-table tbody tr:hover {
+            background: #f3f7fb;
+        }
+
+    .user-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .badge-active {
+        color: #196b3b;
+        background: #d4edda;
+    }
+
+    .badge-locked {
+        color: #922b21;
+        background: #f5c6cb;
+    }
+
+    .badge-doctor {
+        color: #154360;
+        background: #d6eaf8;
+    }
+
+    .badge-other {
+        color: #6c3483;
+        background: #ebdef0;
+    }
+
+    .user-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        min-width: 220px;
+    }
+
+        .user-actions form {
+            display: inline-block;
+            margin: 0;
+        }
+
+    .user-empty {
+        padding: 35px !important;
+        text-align: center;
+        color: #7b8794;
+    }
+
+    @@media(max-width: 768px) {
+        .user-panel {
+            padding: 12px;
+        }
+
+        .user-stat-card {
+            margin-bottom: 12px;
+        }
+    }
+</style>
+
+<div class="container-fluid user-page">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <div>
+            <h2 class="user-title">QUẢN LÝ TÀI KHOẢN</h2>
+            <p class="user-subtitle">
+                Quản lý người dùng, phân quyền và trạng thái tài khoản hệ thống.
+            </p>
+        </div>
+
+        <div class="mb-3">
+            @Html.ActionLink(
+                     "+ Thêm tài khoản mới",
+                     "Create",
+                     "User",
+                     null,
+                     new { @class = "btn btn-primary" }
+                 )
+        </div>
+    </div>
+
+    <!-- THÔNG BÁO -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- THỐNG KÊ -->
+    <div class="row">
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="user-stat-card stat-blue">
+                <div>Tổng tài khoản</div>
+                <h3>@totalUsers</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="user-stat-card stat-green">
+                <div>Đang hoạt động</div>
+                <h3>@activeUsers</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="user-stat-card stat-red">
+                <div>Đã khóa</div>
+                <h3>@lockedUsers</h3>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="user-stat-card stat-purple">
+                <div>Tài khoản bác sĩ</div>
+                <h3>@doctorUsers</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DANH SÁCH -->
+    <div class="user-panel">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <h5 class="font-weight-bold mb-2">
+                <i class="fa fa-users"></i>
+                Danh sách tài khoản
+            </h5>
+
+            <span class="text-muted">
+                Tổng cộng: <strong>@totalUsers</strong> tài khoản
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover user-table">
+
+                <thead>
+                    <tr>
+                        <th style="width:60px;">STT</th>
+                        <th style="width:80px;">Mã</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Quyền</th>
+                        <th>Bác sĩ liên kết</th>
+                        <th>Trạng thái</th>
+                        <th style="min-width:220px;">Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!users.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="user-empty">
+                                <h5>Chưa có tài khoản nào</h5>
+                                <p>Hãy nhấn "Thêm tài khoản mới" để tạo tài khoản.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int index = 0;
+
+                        foreach (var item in users)
+                        {
+                            index++;
+
+                            <tr>
+                                <td class="text-center">
+                                    @index
+                                </td>
+
+                                <td class="text-center">
+                                    <strong>#@item.UserID</strong>
+                                </td>
+
+                                <td>
+                                    <strong>@item.Username</strong>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.FullName)
+                                        ? "Chưa cập nhật"
+                                        : item.FullName)
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.Email)
+                                        ? "Chưa cập nhật"
+                                        : item.Email)
+                                </td>
+
+                                <td>
+                                    @if (item.Role != null)
+                                    {
+                                        if (item.Role.RoleName == "Admin")
+                                        {
+                                            <span class="user-badge badge-locked">
+                                                Admin
+                                            </span>
+                                        }
+                                        else if (item.Role.RoleName == "Doctor")
+                                        {
+                                            <span class="user-badge badge-doctor">
+                                                Doctor
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="user-badge badge-other">
+                                                @item.Role.RoleName
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Chưa phân quyền
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @(item.Doctor != null
+                                        ? item.Doctor.FullName
+                                        : "Không liên kết")
+                                </td>
+
+                                <td class="text-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="user-badge badge-active">
+                                            Đang hoạt động
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="user-badge badge-locked">
+                                            Đã khóa
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <div class="user-actions">
+
+                                        @Html.ActionLink(
+                                                 "Sửa",
+                                                 "Edit",
+                                                 new { id = item.UserID },
+                                                 new { @class = "btn btn-warning btn-sm" }
+                                             )
+
+                                        @Html.ActionLink(
+                                                 "Đặt lại mật khẩu",
+                                                 "ResetPassword",
+                                                 new { id = item.UserID },
+                                                 new { @class = "btn btn-primary btn-sm" }
+                                             )
+
+                                        @using (Html.BeginForm(
+                                            "ToggleStatus",
+                                            "User",
+                                            new { id = item.UserID },
+                                            FormMethod.Post,
+                                            new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+
+                                            if (item.IsActive)
+                                            {
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản @item.Username không?');">
+                                                    Khóa
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit"
+                                                        class="btn btn-success btn-sm"
+                                                        onclick="return confirm('Bạn có muốn mở khóa tài khoản @item.Username không?');">
+                                                    Mở khóa
+                                                </button>
+                                            }
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>

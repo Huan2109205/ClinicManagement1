@@ -1,0 +1,97 @@
+﻿
+@model IEnumerable<ClinicManagement.Models.MedicalRecord>
+
+@{
+    ViewBag.Title = "Quản lý hồ sơ khám bệnh";
+}
+
+<div class="container mt-4">
+    <h2>QUẢN LÝ HỒ SƠ KHÁM BỆNH</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @using (Html.BeginForm("Index", "MedicalRecord", FormMethod.Get))
+    {
+        <div class="row mb-3">
+            <div class="col-md-5">
+                <input type="text"
+                       name="keyword"
+                       value="@ViewBag.Keyword"
+                       class="form-control"
+                       placeholder="Tìm mã hồ sơ hoặc tên bệnh nhân..." />
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                </button>
+            </div>
+
+            @if (!User.IsInRole("Receptionist"))
+            {
+                <div class="col-md-3">
+                    @Html.ActionLink(
+                             " + Lập hồ sơ khám",
+                             "Create",
+                             "MedicalRecord",
+                             null,
+                             new { @class = "btn btn-success" })
+                </div>
+            }
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã hồ sơ</th>
+                    <th>Mã lịch khám</th>
+                    <th>Bệnh nhân</th>
+                    <th>Bác sĩ</th>
+                    <th>Ngày lập</th>
+                    <th>Chẩn đoán</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.RecordCode</td>
+                            <td>@item.Appointment.AppointmentCode</td>
+                            <td>@item.Appointment.Patient.FullName</td>
+                            <td>@item.Appointment.Doctor.FullName</td>
+                            <td>@item.RecordDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.Diagnosis</td>
+                            <td>
+                                @Html.ActionLink(
+                                         "Chi tiết",
+                                         "Details",
+                                         new { id = item.RecordID },
+                                         new { @class = "btn btn-info btn-sm" })
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            Chưa có hồ sơ khám bệnh.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

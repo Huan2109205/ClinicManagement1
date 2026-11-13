@@ -1,0 +1,93 @@
+﻿@model ClinicManagement.Models.Appointment
+
+@{
+    ViewBag.Title = "Đặt lịch khám";
+}
+
+<h2>ĐẶT LỊCH KHÁM MỚI</h2>
+
+<hr />
+
+@using (Html.BeginForm("Create", "Appointment", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.AppointmentCode, "Mã lịch khám")
+        @Html.TextBoxFor(m => m.AppointmentCode,
+                 new { @class = "form-control", placeholder = "Ví dụ: LK001" })
+        @Html.ValidationMessageFor(m => m.AppointmentCode, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.PatientID, "Bệnh nhân")
+        @Html.DropDownListFor(m => m.PatientID,
+                 (IEnumerable<SelectListItem>)ViewBag.PatientID,
+                 "-- Chọn bệnh nhân --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.PatientID, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.DoctorID, "Bác sĩ")
+        @Html.DropDownListFor(m => m.DoctorID,
+                 (IEnumerable<SelectListItem>)ViewBag.DoctorID,
+                 "-- Chọn bác sĩ --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.DoctorID, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.AppointmentDate, "Ngày khám")
+        @Html.TextBoxFor(m => m.AppointmentDate,
+                 "{0:yyyy-MM-dd}",
+                 new { @class = "form-control", type = "date" })
+        @Html.ValidationMessageFor(m => m.AppointmentDate, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.AppointmentTime, "Giờ khám")
+        @Html.TextBox("AppointmentTime",
+                 Model.AppointmentTime.ToString(@"hh\:mm"),
+                 new { @class = "form-control", type = "time" })
+        @Html.ValidationMessageFor(m => m.AppointmentTime, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Reason, "Lý do khám")
+        @Html.TextAreaFor(m => m.Reason, 3, 50,
+                 new { @class = "form-control", placeholder = "Nhập lý do khám" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Status, "Trạng thái")
+        @Html.DropDownListFor(m => m.Status,
+                 (IEnumerable<SelectListItem>)ViewBag.Status,
+                 "-- Chọn trạng thái --",
+                 new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Status, "",
+                 new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Note, "Ghi chú")
+        @Html.TextAreaFor(m => m.Note, 3, 50,
+                 new { @class = "form-control", placeholder = "Ghi chú thêm" })
+    </div>
+
+    <hr />
+
+    <button type="submit" class="btn btn-primary">
+        Lưu lịch khám
+    </button>
+
+    @Html.ActionLink("Quay lại", "Index",
+            null, new { @class = "btn btn-default" })
+}

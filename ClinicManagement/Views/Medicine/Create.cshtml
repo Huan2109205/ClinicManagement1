@@ -1,0 +1,77 @@
+﻿
+@model ClinicManagement.Models.Medicine
+
+@{
+    ViewBag.Title = "Thêm thuốc";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4>THÊM THUỐC MỚI</h4>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(false, "",
+                         new { @class = "text-danger" })
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.MedicineCode, "Mã thuốc")
+                    @Html.TextBoxFor(m => m.MedicineCode,
+                             new { @class = "form-control", placeholder = "VD: T001" })
+                    @Html.ValidationMessageFor(m => m.MedicineCode, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.MedicineName, "Tên thuốc")
+                    @Html.TextBoxFor(m => m.MedicineName,
+                             new { @class = "form-control", placeholder = "Nhập tên thuốc" })
+                    @Html.ValidationMessageFor(m => m.MedicineName, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.ActiveIngredient, "Hoạt chất")
+                    @Html.TextBoxFor(m => m.ActiveIngredient,
+                             new { @class = "form-control" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Unit, "Đơn vị tính")
+                    @Html.TextBoxFor(m => m.Unit,
+                             new { @class = "form-control", placeholder = "Viên, hộp, chai..." })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.UnitPrice, "Đơn giá (VNĐ)")
+                    @Html.TextBoxFor(m => m.UnitPrice,
+                             new { @class = "form-control", type = "number", min = "0", step = "0.01" })
+                    @Html.ValidationMessageFor(m => m.UnitPrice, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Description, "Mô tả")
+                    @Html.TextAreaFor(m => m.Description, 3, 50,
+                             new { @class = "form-control" })
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Lưu thuốc
+                </button>
+
+                @Html.ActionLink("Quay lại", "Index", null,
+                         new { @class = "btn btn-secondary" })
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

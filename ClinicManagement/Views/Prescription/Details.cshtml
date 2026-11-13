@@ -1,0 +1,201 @@
+﻿
+@model ClinicManagement.Models.Prescription
+
+@{
+    ViewBag.Title = "Chi tiết đơn thuốc";
+    decimal total = Model.Details == null ? 0 :
+        Model.Details.Sum(d => d.LineTotal);
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>Chi tiết đơn thuốc</h2>
+        @Html.ActionLink("Quay lại", "Index", null,
+                 new { @class = "btn btn-secondary" })
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            Thông tin đơn thuốc
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <strong>Mã đơn:</strong> @Model.PrescriptionCode
+                </div>
+                <div class="col-md-4 mb-2">
+                    <strong>Ngày kê:</strong>
+                    @Model.PrescriptionDate.ToString("dd/MM/yyyy")
+                </div>
+                <div class="col-md-4 mb-2">
+                    <strong>Mã hồ sơ:</strong>
+                    @Model.MedicalRecord.RecordCode
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Bệnh nhân:</strong>
+                    @Model.MedicalRecord.Appointment.Patient.FullName
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Bác sĩ:</strong>
+                    @Model.MedicalRecord.Appointment.Doctor.FullName
+                </div>
+                <div class="col-12">
+                    <strong>Ghi chú:</strong> @Model.Note
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            Thêm thuốc vào đơn
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("AddMedicine", "Prescription", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.Hidden("prescriptionID", Model.PrescriptionID)
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Chọn thuốc</label>
+                        @Html.DropDownList("medicineID",
+                                 new SelectList(
+                                     ViewBag.Medicines as IEnumerable<ClinicManagement.Models.Medicine>,
+                                     "MedicineID", "MedicineName"),
+                                 "-- Chọn thuốc --",
+                                 new { @class = "form-select", required = "required" })
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Số lượng</label>
+                        <input type="number" name="quantity" min="1"
+                               max="10000" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label>Liều dùng</label>
+                        <input type="text" name="dosage"
+                               class="form-control" maxlength="100"
+                               placeholder="VD: 1 viên/lần" required />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Số lần dùng</label>
+                        <input type="text" name="frequency"
+                               class="form-control" maxlength="100"
+                               placeholder="VD: 2 lần/ngày" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Số ngày sử dụng</label>
+                        <input type="number" name="durationDays"
+                               class="form-control" min="1" max="365" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label>Hướng dẫn sử dụng</label>
+                        <input type="text" name="instructions"
+                               class="form-control" maxlength="500"
+                               placeholder="VD: Uống sau ăn" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    + Thêm thuốc
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            Danh sách thuốc trong đơn
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên thuốc</th>
+                        <th>Số lượng</th>
+                        <th>Liều dùng</th>
+                        <th>Tần suất</th>
+                        <th>Số ngày</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                        <th>Hướng dẫn</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{
+                        int stt = 1;
+                    }
+
+                    @foreach (var item in Model.Details)
+                    {
+                        <tr>
+                            <td>@stt</td>
+                            <td>@item.Medicine.MedicineName</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.Dosage</td>
+                            <td>@item.Frequency</td>
+                            <td>@(item.DurationDays.HasValue ? item.DurationDays + " ngày" : "")</td>
+                            <td>@item.UnitPrice.ToString("N0") đ</td>
+                            <td>@item.LineTotal.ToString("N0") đ</td>
+                            <td>@item.Instructions</td>
+                            <td>
+                                @using (Html.BeginForm("RemoveMedicine", "Prescription",
+                                    new { id = item.PrescriptionDetailID }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Bạn có chắc muốn xóa thuốc này khỏi đơn?');">
+                                        Xóa
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+
+                    @if (!Model.Details.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">
+                                Đơn thuốc chưa có thuốc.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <th colspan="7" class="text-end">Tổng tiền:</th>
+                        <th colspan="2" class="text-danger">
+                            @total.ToString("N0") đ
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+﻿
+@model ClinicManagement.Models.MedicalRecord
+
+@{
+    ViewBag.Title = "Lập hồ sơ khám bệnh";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4>LẬP HỒ SƠ KHÁM BỆNH</h4>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.RecordCode, "Mã hồ sơ")
+                    @Html.TextBoxFor(m => m.RecordCode,
+                             new { @class = "form-control", placeholder = "VD: HS001" })
+                    @Html.ValidationMessageFor(m => m.RecordCode, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.AppointmentID, "Lịch khám đã hoàn thành")
+                    @Html.DropDownList("AppointmentID",
+                             (SelectList)ViewBag.AppointmentID,
+                             "-- Chọn lịch khám --",
+                             new { @class = "form-select" })
+                    @Html.ValidationMessageFor(m => m.AppointmentID, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Symptoms, "Triệu chứng")
+                    @Html.TextAreaFor(m => m.Symptoms, 3, 50,
+                             new { @class = "form-control", placeholder = "Nhập triệu chứng..." })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Diagnosis, "Chẩn đoán")
+                    @Html.TextAreaFor(m => m.Diagnosis, 3, 50,
+                             new { @class = "form-control", placeholder = "Nhập chẩn đoán..." })
+                    @Html.ValidationMessageFor(m => m.Diagnosis, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Treatment, "Phương pháp điều trị")
+                    @Html.TextAreaFor(m => m.Treatment, 3, 50,
+                             new { @class = "form-control", placeholder = "Nhập phương pháp điều trị..." })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.DoctorAdvice, "Lời dặn bác sĩ")
+                    @Html.TextAreaFor(m => m.DoctorAdvice, 3, 50,
+                             new { @class = "form-control", placeholder = "Nhập lời dặn..." })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Note, "Ghi chú")
+                    @Html.TextAreaFor(m => m.Note, 3, 50,
+                             new { @class = "form-control" })
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Lưu hồ sơ
+                </button>
+
+                @Html.ActionLink("Quay lại", "Index", null,
+                         new { @class = "btn btn-secondary" })
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,551 @@
+﻿
+@using System
+@{
+    ViewBag.Title = "Tổng quan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .dashboard-title {
+        font-weight: 800;
+        color: #263445;
+        margin-bottom: 5px;
+    }
+
+    .dashboard-subtitle {
+        color: #7b8794;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 14px;
+        padding: 22px;
+        color: white;
+        min-height: 145px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.07);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 9px 20px rgba(0,0,0,.12);
+        }
+
+        .stat-card h6 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h2 {
+            font-size: 30px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .stat-card p {
+            font-size: 12px;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+    .card-patients {
+        background: linear-gradient(135deg,#3498db,#2471a3);
+    }
+
+    .card-doctors {
+        background: linear-gradient(135deg,#27ae60,#1e8449);
+    }
+
+    .card-appointments {
+        background: linear-gradient(135deg,#8e44ad,#6c3483);
+    }
+
+    .card-today {
+        background: linear-gradient(135deg,#e67e22,#ca6f1e);
+    }
+
+    .card-invoices {
+        background: linear-gradient(135deg,#16a085,#117864);
+    }
+
+    .card-unpaid {
+        background: linear-gradient(135deg,#e74c3c,#b03a2e);
+    }
+
+    .card-partial {
+        background: linear-gradient(135deg,#f39c12,#b9770e);
+    }
+
+    .card-remaining {
+        background: linear-gradient(135deg,#34495e,#2c3e50);
+    }
+
+    .dashboard-panel {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,.05);
+        margin-bottom: 22px;
+    }
+
+    .panel-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #263445;
+        margin-bottom: 20px;
+    }
+
+    .revenue-number {
+        font-size: 30px;
+        font-weight: 800;
+        color: #159957;
+    }
+
+    .remaining-number {
+        font-size: 30px;
+        font-weight: 800;
+        color: #e67e22;
+    }
+
+    .dashboard-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+        .dashboard-link:hover {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    .table-dashboard th {
+        background: #f5f7fa;
+        color: #526174;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .table-dashboard td {
+        vertical-align: middle;
+        font-size: 13px;
+    }
+
+    .quick-link {
+        text-align: left;
+        padding: 11px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .empty-data {
+        text-align: center;
+        color: #8793a1;
+        padding: 25px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    @@media (max-width: 576px) {
+        .stat-card h2 {
+            font-size: 25px;
+        }
+
+        .revenue-number,
+        .remaining-number {
+            font-size: 23px;
+        }
+
+        .dashboard-panel {
+            padding: 16px;
+        }
+    }
+
+    .card-totalamount {
+        background: linear-gradient(135deg,#2980b9,#1f618d);
+    }
+
+    .card-cancelled {
+        background: linear-gradient(135deg,#7f8c8d,#566573);
+    }
+</style>
+
+<div class="container-fluid">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="mb-4">
+        <h2 class="dashboard-title">TỔNG QUAN PHÒNG KHÁM</h2>
+        <p class="dashboard-subtitle">
+            Xin chào, @User.Identity.Name.
+            Đây là tình hình hoạt động của phòng khám.
+        </p>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="row">
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Patient")" class="dashboard-link">
+                <div class="stat-card card-patients">
+                    <h6>TỔNG BỆNH NHÂN</h6>
+                    <h2>@ViewBag.TotalPatients</h2>
+                    <p>Quản lý hồ sơ bệnh nhân</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Doctor")" class="dashboard-link">
+                <div class="stat-card card-doctors">
+                    <h6>BÁC SĨ ĐANG HOẠT ĐỘNG</h6>
+                    <h2>@ViewBag.TotalDoctors</h2>
+                    <p>Quản lý thông tin bác sĩ</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Appointment")" class="dashboard-link">
+                <div class="stat-card card-appointments">
+                    <h6>TỔNG LỊCH KHÁM</h6>
+                    <h2>@ViewBag.TotalAppointments</h2>
+                    <p>Quản lý lịch hẹn khám bệnh</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Appointment")" class="dashboard-link">
+                <div class="stat-card card-today">
+                    <h6>LỊCH KHÁM HÔM NAY</h6>
+                    <h2>@ViewBag.TodayAppointments</h2>
+                    <p>Số lịch khám trong ngày</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-invoices">
+                    <h6>TỔNG SỐ HÓA ĐƠN</h6>
+                    <h2>@ViewBag.TotalInvoices</h2>
+                    <p>Quản lý hóa đơn phòng khám</p>
+                </div>
+            </a>
+        </div>
+        <!-- TỔNG GIÁ TRỊ HÓA ĐƠN -->
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-totalamount">
+                    <h6>TỔNG GIÁ TRỊ HÓA ĐƠN</h6>
+                    <h2 style="font-size:23px">
+                        @String.Format("{0:N0}", ViewBag.TotalInvoiceAmount)
+                    </h2>
+                    <p>Không tính hóa đơn đã hủy (VNĐ)</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- HÓA ĐƠN ĐÃ HỦY -->
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-cancelled">
+                    <h6>HÓA ĐƠN ĐÃ HỦY</h6>
+                    <h2>@ViewBag.CancelledInvoices</h2>
+                    <p>Số hóa đơn đã hủy</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-unpaid">
+                    <h6>HÓA ĐƠN CHƯA THANH TOÁN</h6>
+                    <h2>@ViewBag.UnpaidInvoices</h2>
+                    <p>Theo dõi công nợ thanh toán</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-partial">
+                    <h6>HÓA ĐƠN THANH TOÁN MỘT PHẦN</h6>
+                    <h2>@ViewBag.PartialInvoices</h2>
+                    <p>Các hóa đơn chưa thu đủ tiền</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="@Url.Action("Index", "Invoice")" class="dashboard-link">
+                <div class="stat-card card-remaining">
+                    <h6>TỔNG TIỀN CÒN PHẢI THU</h6>
+                    <h2 style="font-size:23px">
+                        @String.Format("{0:N0}", ViewBag.TotalRemaining)
+                    </h2>
+                    <p>Số tiền chưa thu từ các hóa đơn</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- DOANH THU VÀ TRUY CẬP NHANH -->
+    <div class="row">
+
+        <div class="col-lg-6">
+            <div class="dashboard-panel">
+                <h4 class="panel-title">DOANH THU ĐÃ THU</h4>
+
+                <div class="revenue-number">
+                    @String.Format("{0:N0}", ViewBag.TotalRevenue) VNĐ
+                </div>
+
+                <p class="text-muted mt-2 mb-0">
+                    Tổng tiền thực tế đã nhận, bao gồm thanh toán một phần
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="dashboard-panel">
+                <h4 class="panel-title">TRUY CẬP NHANH</h4>
+
+                <div class="d-grid gap-2">
+
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Receptionist"))
+                    {
+                        @Html.ActionLink("Quản lý bệnh nhân", "Index", "Patient",
+                                           null, new { @class = "btn btn-outline-primary quick-link" })
+
+                        @Html.ActionLink("Quản lý bác sĩ", "Index", "Doctor",
+                                           null, new { @class = "btn btn-outline-success quick-link" })
+                    }
+
+                    @Html.ActionLink("Quản lý lịch khám", "Index", "Appointment",
+                                       null, new { @class = "btn btn-outline-info quick-link" })
+
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Receptionist"))
+                    {
+                        @Html.ActionLink("Quản lý hóa đơn", "Index", "Invoice",
+                                           null, new { @class = "btn btn-outline-warning quick-link" })
+                    }
+
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager"))
+                    {
+                        @Html.ActionLink("Thống kê và báo cáo", "Index", "Statistics",
+                                           null, new { @class = "btn btn-outline-dark quick-link" })
+                    }
+
+                    @if (User.IsInRole("Admin") ||
+                         User.IsInRole("Manager") ||
+                         User.IsInRole("Doctor"))
+                    {
+                        @Html.ActionLink("Quản lý đơn thuốc", "Index", "Prescription",
+                                           null, new { @class = "btn btn-primary quick-link" })
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- BIỂU ĐỒ DOANH THU VÀ CÔNG NỢ -->
+    <div class="dashboard-panel">
+        <h4 class="panel-title">
+            DOANH THU VÀ CÔNG NỢ THEO THÁNG - @ViewBag.SelectedYear
+        </h4>
+
+        <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+
+    <!-- LỊCH KHÁM GẦN ĐÂY -->
+    <div class="dashboard-panel">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="panel-title mb-0">LỊCH KHÁM GẦN ĐÂY</h4>
+
+            @Html.ActionLink("Xem tất cả", "Index", "Appointment",
+                               null, new { @class = "btn btn-sm btn-outline-primary" })
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-dashboard">
+                <thead>
+                    <tr>
+                        <th>Mã lịch khám</th>
+                        <th>Bệnh nhân</th>
+                        <th>Bác sĩ</th>
+                        <th>Ngày khám</th>
+                        <th>Giờ khám</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (ViewBag.RecentAppointments != null &&
+                         ((System.Collections.ICollection)ViewBag.RecentAppointments).Count > 0)
+                    {
+                        foreach (var item in ViewBag.RecentAppointments)
+                        {
+                            <tr>
+                                <td><strong>@item.AppointmentCode</strong></td>
+
+                                <td>
+                                    @(item.Patient != null
+                                        ? item.Patient.FullName
+                                        : "Không xác định")
+                                </td>
+
+                                <td>
+                                    @(item.Doctor != null
+                                        ? item.Doctor.FullName
+                                        : "Không xác định")
+                                </td>
+
+                                <td>@item.AppointmentDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.AppointmentTime</td>
+
+                                <td>
+                                    @if (item.Status == "Hoàn thành")
+                                    {
+                                        <span class="badge bg-success">@item.Status</span>
+                                    }
+                                    else if (item.Status == "Đã hủy")
+                                    {
+                                        <span class="badge bg-danger">@item.Status</span>
+                                    }
+                                    else if (item.Status == "Đang khám")
+                                    {
+                                        <span class="badge bg-primary">@item.Status</span>
+                                    }
+                                    else if (item.Status == "Đã xác nhận")
+                                    {
+                                        <span class="badge bg-info text-dark">@item.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">@item.Status</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="empty-data">
+                                Chưa có lịch khám nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+@section scripts {
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var canvas = document.getElementById("revenueChart");
+
+        if (!canvas || typeof Chart === "undefined") {
+            return;
+        }
+
+        var labels = @Html.Raw(Json.Encode(ViewBag.RevenueLabels));
+        var revenueData = @Html.Raw(Json.Encode(ViewBag.RevenueData));
+        var debtData = @Html.Raw(Json.Encode(ViewBag.DebtData));
+
+        new Chart(canvas, {
+            type: "bar",
+
+            data: {
+                labels: labels,
+
+                datasets: [
+                    {
+                        label: "Doanh thu đã thu (VNĐ)",
+                        data: revenueData,
+                        backgroundColor: "rgba(46, 204, 113, 0.65)",
+                        borderColor: "rgba(39, 174, 96, 1)",
+                        borderWidth: 1,
+                        borderRadius: 6
+                    },
+                    {
+                        label: "Công nợ còn lại (VNĐ)",
+                        data: debtData,
+                        backgroundColor: "rgba(231, 76, 60, 0.65)",
+                        borderColor: "rgba(192, 57, 43, 1)",
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ": " +
+                                    Number(context.raw).toLocaleString("vi-VN") +
+                                    " VNĐ";
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            callback: function (value) {
+                                return Number(value).toLocaleString("vi-VN");
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+
+}

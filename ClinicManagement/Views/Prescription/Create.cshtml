@@ -1,0 +1,58 @@
+﻿
+@model ClinicManagement.Models.Prescription
+
+@{
+    ViewBag.Title = "Tạo đơn thuốc";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Tạo đơn thuốc mới</h4>
+        </div>
+
+        <div class="card-body">
+            @using (Html.BeginForm("Create", "Prescription", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.PrescriptionCode, "Mã đơn thuốc")
+                    @Html.TextBoxFor(m => m.PrescriptionCode,
+                             new { @class = "form-control", placeholder = "VD: DT001" })
+                    @Html.ValidationMessageFor(m => m.PrescriptionCode, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.RecordID, "Hồ sơ bệnh án")
+                    @Html.DropDownListFor(m => m.RecordID,
+                             (SelectList)ViewBag.RecordID,
+                             "-- Chọn hồ sơ bệnh án --",
+                             new { @class = "form-select" })
+                    @Html.ValidationMessageFor(m => m.RecordID, "",
+                             new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Note, "Ghi chú")
+                    @Html.TextAreaFor(m => m.Note,
+                             new { @class = "form-control", rows = 3 })
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Tạo đơn thuốc
+                </button>
+
+                @Html.ActionLink("Quay lại", "Index", null,
+                         new { @class = "btn btn-secondary ms-2" })
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
